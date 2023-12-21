@@ -1,6 +1,7 @@
 #include "GameState.h"
 #include "Queue.h"
 #include <stdio.h>
+#include <string.h>
 
 /*  Merges adjacent tiles with the same value to the left.  */
 void merge_tiles_left(int row[4]) {
@@ -22,9 +23,16 @@ void merge_tiles_left(int row[4]) {
         row[index] = dequeue(&queue);
 
         if (row[index] == front(&queue)) {
-            row[index] =+ dequeue(&queue); 
+            row[index] += dequeue(&queue); 
         }
 
+        index++;
+    }
+
+    // set all further elements equal to zero
+    while (index < 4)
+    {
+        row[index] = 0;
         index++;
     }
 }
@@ -32,7 +40,7 @@ void merge_tiles_left(int row[4]) {
 void initializeGameState(GameState *state) {
 
     int testboard[4][4] = {
-        {0,0,0,0},
+        {2,2,2,2},
         {0,0,0,0},
         {0,0,0,0},
         {0,0,0,0}
@@ -54,15 +62,19 @@ void apply_move(GameState *state, Action action) {
                 merge_tiles_left(state->board[i]);
             }
 
+            break;
         case MOVE_RIGHT:
 
 
+            break;
         case MOVE_UP:
 
 
+            break;
         case MOVE_DOWN:
 
 
+            break;
         default:
             fprintf(stderr, "Invalid move.\n");
     }
@@ -73,6 +85,8 @@ int is_game_over(GameState *state) {
 }
 
 void boardToString(GameState *state, char *string) {
+    string[0] = '\0';
+
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             sprintf(string + strlen(string), "%5d", state->board[i][j]);
