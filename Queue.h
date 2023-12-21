@@ -20,6 +20,6 @@ void enqueue(Queue *queue, int element);
 /*  Dequeues the element at the front of the queue.     */
 int dequeue(Queue *queue);
 /*  Returns the value of the element at the front of the queue.     */
-// int front(Queue *queue);
+int front(Queue *queue);
 
 #endif
