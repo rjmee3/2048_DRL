@@ -41,9 +41,9 @@ void initializeGameState(GameState *state) {
 
     int testboard[4][4] = {
         {2,2,2,2},
-        {0,0,0,0},
-        {0,0,0,0},
-        {0,0,0,0}
+        {4,2,0,2},
+        {2,0,8,2},
+        {4,4,8,16}
     };
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
