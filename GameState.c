@@ -1,19 +1,32 @@
 #include "GameState.h"
+#include "Queue.h"
 #include <stdio.h>
-
-// /*  moves non-zero tiles to the left.   */
-// void shift_tiles_left(int row[4]) {
-//     // enqueue each element within the row
-//     for (int i = 0; i < 4; i++) {
-//         if (row[i] != 0) {
-            
-//         }
-//     }
-// }
 
 /*  Merges adjacent tiles with the same value to the left.  */
 void merge_tiles_left(int row[4]) {
+    // initialize a queue to store all values in one row
+    Queue queue;
+    initializeQueue(&queue);
 
+    // enqueue all non-zero elements in the row
+    for (int i = 0; i < 4; i++) {
+        if (row[i] != 0) {
+            enqueue(&queue, row[i]);
+        }
+    }
+
+    int index = 0;
+
+    // dequeue elements into the row, merging like elements
+    while (!isEmpty(&queue)) {
+        row[index] = dequeue(&queue);
+
+        if (row[index] == front(&queue)) {
+            row[index] =+ dequeue(&queue); 
+        }
+
+        index++;
+    }
 }
 
 void apply_move(GameState *state, Action action) {
@@ -23,7 +36,6 @@ void apply_move(GameState *state, Action action) {
     switch (action) {
         case MOVE_LEFT:
             for (int i = 0; i < 4; i++) {
-                // shift_tiles_left(state->board[i]);
                 merge_tiles_left(state->board[i]);
             }
 
