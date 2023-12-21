@@ -29,6 +29,21 @@ void merge_tiles_left(int row[4]) {
     }
 }
 
+void initializeGameState(GameState *state) {
+
+    int testboard[4][4] = {
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0}
+    };
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            state->board[i][j] = testboard[i][j];
+        }
+    }
+}
+
 void apply_move(GameState *state, Action action) {
     // save an original copy of the state for comparison
     GameState original_state = *state;
@@ -55,4 +70,13 @@ void apply_move(GameState *state, Action action) {
 
 int is_game_over(GameState *state) {
     
+}
+
+void boardToString(GameState *state, char *string) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            sprintf(string + strlen(string), "%5d", state->board[i][j]);
+        }
+        strcat(string, "\n");
+    }
 }
