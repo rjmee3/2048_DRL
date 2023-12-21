@@ -1,15 +1,15 @@
 #include "GameState.h"
 #include <stdio.h>
 
-/*  moves non-zero tiles to the left.   */
-void shift_tiles_left(int row[4]) {
-    // enqueue each element within the row
-    for (int i = 0; i < 4; i++) {
-        if (row[i] != 0) {
+// /*  moves non-zero tiles to the left.   */
+// void shift_tiles_left(int row[4]) {
+//     // enqueue each element within the row
+//     for (int i = 0; i < 4; i++) {
+//         if (row[i] != 0) {
             
-        }
-    }
-}
+//         }
+//     }
+// }
 
 /*  Merges adjacent tiles with the same value to the left.  */
 void merge_tiles_left(int row[4]) {
@@ -23,7 +23,7 @@ void apply_move(GameState *state, Action action) {
     switch (action) {
         case MOVE_LEFT:
             for (int i = 0; i < 4; i++) {
-                shift_tiles_left(state->board[i]);
+                // shift_tiles_left(state->board[i]);
                 merge_tiles_left(state->board[i]);
             }
 
@@ -37,7 +37,7 @@ void apply_move(GameState *state, Action action) {
 
 
         default:
-            fprintf(stderr, "Invalid move.");
+            fprintf(stderr, "Invalid move.\n");
     }
 }
 

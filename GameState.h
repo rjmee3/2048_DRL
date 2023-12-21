@@ -19,7 +19,6 @@ typedef enum {
 
 /*  Applies the action to the game state.*/
 void apply_move(GameState *state, Action action);
-
 /*  Checks the game state passed for whether it is possible
     to make another move. Returns 0 if another move is available,
     returns 1 if there are no moves left, indicating a game over.   */
