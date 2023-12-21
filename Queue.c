@@ -58,7 +58,7 @@ int dequeue(Queue *queue) {
 int front(Queue *queue) {
     // print err if queue is empty
     if (isEmpty(queue)) {
-        fprintf(stderr, "Queue Empty. No Front Element.\n");
+        // fprintf(stderr, "Queue Empty. No Front Element.\n");
         return -1;
     }
 
