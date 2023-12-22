@@ -37,7 +37,7 @@ int dequeue(Queue *queue) {
     // print error if queue is empty
     if (isEmpty(queue)) {
         fprintf(stderr, "Queue is Empty. Cannot Dequeue.\n");
-        return;
+        return -1;
     }
 
     // get element at front
