@@ -22,6 +22,7 @@ void merge_tiles_left(int row[4]) {
     while (!isEmpty(&queue)) {
         row[index] = dequeue(&queue);
 
+        // this merges like elements
         if (row[index] == front(&queue)) {
             row[index] += dequeue(&queue); 
         }
