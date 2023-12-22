@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/my_program.dir/driver.c.o CMakeFiles/my_program.dir/GameState.c.o CMakeFiles/my_program.dir/Queue.c.o -o my_program 

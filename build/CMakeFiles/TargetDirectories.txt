@@ -1,3 +1,0 @@
-/home/rjmeeker3/2048_DRL/build/CMakeFiles/my_program.dir
-/home/rjmeeker3/2048_DRL/build/CMakeFiles/edit_cache.dir
-/home/rjmeeker3/2048_DRL/build/CMakeFiles/rebuild_cache.dir
