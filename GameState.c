@@ -37,46 +37,28 @@ void merge_tiles_left(int row[4]) {
     }
 }
 
-/*  Merges adjacent tiles with the same value to the right.  */
-void merge_tiles_right(int row[4]) {
-    // initialize a queue to store all values in one row
-    Queue queue;
-    initializeQueue(&queue);
-
-    // enqueue all non-zero elements in the row
-    for (int i = 3; i >= 0; i--) {
-        if (row[i] != 0) {
-            enqueue(&queue, row[i]);
-        }
-    }
-
-    int index = 3;
-
-    // dequeue elements into the row, merging like elements
-    while (!isEmpty(&queue)) {
-        row[index] = dequeue(&queue);
-
-        if (row[index] == front(&queue)) {
-            row[index] += dequeue(&queue); 
-        }
-
-        index--;
-    }
-
-    // set all further elements equal to zero
-    while (index >= 0)
-    {
-        row[index] = 0;
-        index--;
-    }
-}
-
 /*  function to transpose board matrix for up and down moves    */
 void transpose(int original_matrix[4][4]) {
     int temp_matrix[4][4];
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             temp_matrix[j][i] = original_matrix[i][j];
+        }
+    }
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            original_matrix[i][j] = temp_matrix[i][j];
+        }
+    }
+}
+
+/*  function to reflect board matrix    */
+void reflect(int original_matrix[4][4]) {
+    int temp_matrix[4][4];
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            temp_matrix[i][3-j] = original_matrix[i][j];
         }
     }
 
@@ -117,7 +99,9 @@ void apply_move(GameState *state, Action action) {
             break;
         case MOVE_RIGHT:
             for (int i = 0; i < 4; i++) {
-                merge_tiles_right(state->board[i]);
+                reflect(state->board);
+                merge_tiles_left(state->board[i]);
+                reflect(state->board);
             }
 
             break;
@@ -138,7 +122,9 @@ void apply_move(GameState *state, Action action) {
             transpose(state->board);
 
             for (int i = 0; i < 4; i++) {
-                merge_tiles_right(state->board[i]);
+                reflect(state->board);
+                merge_tiles_left(state->board[i]);
+                reflect(state->board);
             }
 
             // transpose again
