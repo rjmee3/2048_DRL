@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
-project(MyProgram)
+project(2048_DRL)
 
 # Add the main executable
-add_executable(my_program driver.c)
+add_executable(2048_DRL driver.c)
 
 # Add the other source files to the executable
-target_sources(my_program PRIVATE GameState.c Queue.c)
+target_sources(2048_DRL PRIVATE GameState.c Queue.c)
 
 # Include directories for header files
-target_include_directories(my_program PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Optionally, you can set additional compiler flags
-# target_compile_options(my_program PRIVATE -Wall -Wextra)
+target_include_directories(2048_DRL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
