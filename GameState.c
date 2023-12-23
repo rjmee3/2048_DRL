@@ -2,6 +2,8 @@
 #include "Queue.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 /*  Merges adjacent tiles with the same value to the left.  */
 void merge_tiles_left(int row[4]) {
@@ -71,18 +73,8 @@ void reflect(int original_matrix[4][4]) {
 }
 
 void initializeGameState(GameState *state) {
-
-    int testboard[4][4] = {
-        {2,0,0,2},
-        {0,2,0,0},
-        {0,4,0,8},
-        {0,0,16,0}
-    };
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            state->board[i][j] = testboard[i][j];
-        }
-    }
+    spawnTile(state);
+    spawnTile(state);
 }
 
 void apply_move(GameState *state, Action action) {
@@ -90,6 +82,7 @@ void apply_move(GameState *state, Action action) {
     GameState original_state = *state;
 
     char output[200];
+    srand(time(0));
 
     switch (action) {
         case MOVE_LEFT:
@@ -143,12 +136,36 @@ void apply_move(GameState *state, Action action) {
     }
 
     if (memcmp(state, &original_state, sizeof(GameState)) != 0) {
-
+        spawnTile(state);
     }
 }
 
 int is_game_over(GameState *state) {
     
+}
+
+void spawnTile(GameState *state) {
+    int empty_space = 0;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->board[i][j] == 0) {
+                empty_space++;
+            }
+        }
+    }
+
+    if (empty_space > 0) {
+        int rand_space = rand() % empty_space;
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if ((i + j) == rand_space) {
+                    state->board[i][j] = 2;
+                }
+            }
+        }
+    }
 }
 
 void boardToString(GameState *state, char *string) {

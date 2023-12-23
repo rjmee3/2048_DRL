@@ -8,24 +8,39 @@ int main() {
 
     char output[200];
     boardToString(&state, output);
+    int move;
 
     printf("Initial Board:\n\n%s", output);
 
-    apply_move(&state, MOVE_UP);
-    boardToString(&state, output);
-    printf("Move Up.\nNew Board:\n\n%s", output);
+    while (1) {
+        printf("\n\nEnter Move: ");
+        scanf("%d", move);
 
-    apply_move(&state, MOVE_RIGHT);
-    boardToString(&state, output);
-    printf("Move Right.\nNew Board:\n\n%s", output);
+        switch (move) {
+            case 1:
+                apply_move(&state, MOVE_UP);
+                break;
 
-    apply_move(&state, MOVE_DOWN);
-    boardToString(&state, output);
-    printf("Move Down.\nNew Board:\n\n%s", output);
+            case 2:
+                apply_move(&state, MOVE_DOWN);
+                break;
 
-    apply_move(&state, MOVE_LEFT);
-    boardToString(&state, output);
-    printf("Move Left.\nNew Board:\n\n%s", output);
+            case 3:
+                apply_move(&state, MOVE_LEFT);
+                break;
+
+            case 4:
+                apply_move(&state, MOVE_RIGHT);
+                break;
+
+            default:
+                printf("\n\nInvalid Move...\n\n");
+        }
+
+        boardToString(&state, output);
+
+        printf("New Board:\n\n%s", output);
+    }
 
     return 0;
 }
