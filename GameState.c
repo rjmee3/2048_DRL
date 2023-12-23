@@ -98,42 +98,52 @@ void apply_move(GameState *state, Action action) {
             }
 
             break;
+
         case MOVE_RIGHT:
+            reflect(state->board);
+
             for (int i = 0; i < 4; i++) {
-                reflect(state->board);
                 merge_tiles_left(state->board[i]);
-                reflect(state->board);
             }
+            
+            // undo transformations
+            reflect(state->board);
+
 
             break;
+
         case MOVE_UP:
-            // transpose board matrix first
             transpose(state->board);
 
             for (int i = 0; i < 4; i++) {
                 merge_tiles_left(state->board[i]);
             }
 
-            // transpose again
+            // undo transformations
             transpose(state->board);
 
             break;
+
         case MOVE_DOWN:
-            // transpose board matrix first
             transpose(state->board);
+            reflect(state->board);
 
             for (int i = 0; i < 4; i++) {
-                reflect(state->board);
                 merge_tiles_left(state->board[i]);
-                reflect(state->board);
             }
 
-            // transpose again
+            // undo transformations
+            reflect(state->board);
             transpose(state->board);
 
             break;
+
         default:
             fprintf(stderr, "Invalid move.\n");
+    }
+
+    if (memcmp(state, &original_state, sizeof(GameState)) != 0) {
+
     }
 }
 
