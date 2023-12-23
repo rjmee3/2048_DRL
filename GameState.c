@@ -40,6 +40,38 @@ void merge_tiles_left(int row[4]) {
     }
 }
 
+void spawnTile(GameState *state) {
+    int empty_space = 0;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->board[i][j] == 0) {
+                empty_space++;
+            }
+        }
+    }
+
+    if (empty_space = 0) {
+        return;
+    }
+    
+    int rand_space = rand() % (empty_space - 1);
+
+    int index = 0;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->board[i][j] == 0) {
+                if (rand_space == index) {
+                    state->board[i][j] = 2;
+                    return;
+                }
+                index++;
+            }
+        }
+    }
+}
+
 /*  function to transpose board matrix for up and down moves    */
 void transpose(int original_matrix[4][4]) {
     int temp_matrix[4][4];
@@ -73,6 +105,13 @@ void reflect(int original_matrix[4][4]) {
 }
 
 void initializeGameState(GameState *state) {
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            state->board[i][j] = 0;
+        }
+    }
+    
     spawnTile(state);
     spawnTile(state);
 }
@@ -142,30 +181,6 @@ void apply_move(GameState *state, Action action) {
 
 int is_game_over(GameState *state) {
     
-}
-
-void spawnTile(GameState *state) {
-    int empty_space = 0;
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (state->board[i][j] == 0) {
-                empty_space++;
-            }
-        }
-    }
-
-    if (empty_space > 0) {
-        int rand_space = rand() % empty_space;
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if ((i + j) == rand_space) {
-                    state->board[i][j] = 2;
-                }
-            }
-        }
-    }
 }
 
 void boardToString(GameState *state, char *string) {

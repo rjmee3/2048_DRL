@@ -14,7 +14,7 @@ int main() {
 
     while (1) {
         printf("\n\nEnter Move: ");
-        scanf("%d", move);
+        scanf("%d", &move);
 
         switch (move) {
             case 1:
