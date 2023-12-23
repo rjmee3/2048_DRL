@@ -84,12 +84,12 @@ void spawnTile(GameState *state) {
         }
     }
 
-    if (empty_space = 0) {
+    if (empty_space == 0) {
         return;
     }
 
-    int rand_space = rand() % (empty_space);
-    int index = 1;
+    int rand_space = rand() % (empty_space - 1);
+    int index = 0;
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
