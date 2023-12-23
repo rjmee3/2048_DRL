@@ -40,38 +40,6 @@ void merge_tiles_left(int row[4]) {
     }
 }
 
-void spawnTile(GameState *state) {
-    int empty_space = 0;
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (state->board[i][j] == 0) {
-                empty_space++;
-            }
-        }
-    }
-
-    if (empty_space = 0) {
-        return;
-    }
-    
-    int rand_space = rand() % (empty_space - 1);
-
-    int index = 0;
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (state->board[i][j] == 0) {
-                if (rand_space == index) {
-                    state->board[i][j] = 2;
-                    return;
-                }
-                index++;
-            }
-        }
-    }
-}
-
 /*  function to transpose board matrix for up and down moves    */
 void transpose(int original_matrix[4][4]) {
     int temp_matrix[4][4];
@@ -100,6 +68,39 @@ void reflect(int original_matrix[4][4]) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             original_matrix[i][j] = temp_matrix[i][j];
+        }
+    }
+}
+
+/*  Spawns a random tile on the board   */
+void spawnTile(GameState *state) {
+    int empty_space = 0;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->board[i][j] == 0) {
+                empty_space++;
+            }
+        }
+    }
+
+    if (empty_space = 0) {
+        return;
+    }
+
+    int rand_space = rand() % (empty_space - 1);
+
+    int index = 0;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->board[i][j] == 0) {
+                if (rand_space == index) {
+                    state->board[i][j] = 2;
+                    return;
+                }
+                index++;
+            }
         }
     }
 }
