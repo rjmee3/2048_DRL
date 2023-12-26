@@ -74,6 +74,9 @@ void reflect(int original_matrix[4][4]) {
 
 /*  Spawns a random tile on the board   */
 void spawnTile(GameState *state) {
+
+    srand(time(0));
+
     int empty_space = 0;
 
     for (int i = 0; i < 4; i++) {
@@ -90,6 +93,8 @@ void spawnTile(GameState *state) {
 
     int rand_space = rand() % (empty_space - 1);
     int index = 0;
+
+    // printf("\n\nrand num: %d\n\n", rand_space);
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -118,7 +123,6 @@ void apply_move(GameState *state, Action action) {
     GameState original_state = *state;
 
     char output[200];
-    srand(time(0));
 
     switch (action) {
         case MOVE_LEFT:
