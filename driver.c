@@ -8,28 +8,28 @@ int main() {
 
     char output[200];
     boardToString(&state, output);
-    int move;
+    char move;
 
     printf("Initial Board:\n\n%s", output);
 
     while (1) {
         printf("\n\nEnter Move: ");
-        scanf("%d", &move);
+        scanf(" %c", &move);
 
         switch (move) {
-            case 1:
+            case 'w':
                 apply_move(&state, MOVE_UP);
                 break;
 
-            case 2:
+            case 's':
                 apply_move(&state, MOVE_DOWN);
                 break;
 
-            case 3:
+            case 'a':
                 apply_move(&state, MOVE_LEFT);
                 break;
 
-            case 4:
+            case 'd':
                 apply_move(&state, MOVE_RIGHT);
                 break;
 
