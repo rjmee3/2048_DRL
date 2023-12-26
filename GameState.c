@@ -125,7 +125,7 @@ void initializeGameState(GameState *state) {
     spawnTile(state);
 }
 
-void apply_move(GameState *state, Action action) {
+int apply_move(GameState *state, Action action) {
     // save an original copy of the state for comparison
     GameState original_state = *state;
 
@@ -184,7 +184,11 @@ void apply_move(GameState *state, Action action) {
 
     if (memcmp(state, &original_state, sizeof(GameState)) != 0) {
         spawnTile(state);
+
+        return 0;
     }
+
+    return 1;
 }
 
 int is_game_over(GameState *state) {
