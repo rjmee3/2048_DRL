@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "gamestate.h": "c"
+        "gamestate.h": "c",
+        "neuralnetwork.h": "c",
+        "stdlib.h": "c",
+        "math.h": "c"
     }
 }
