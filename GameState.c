@@ -149,7 +149,6 @@ int apply_move(GameState *state, Action action) {
             // undo transformations
             reflect(state->board);
 
-
             break;
 
         case MOVE_UP:
