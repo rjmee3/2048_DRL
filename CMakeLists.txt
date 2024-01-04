@@ -8,7 +8,7 @@ add_executable(2048_DRL driver.c)
 target_link_libraries(2048_DRL m)
 
 # Add the other source files to the executable
-target_sources(2048_DRL PRIVATE GameState.c Queue.c NeuralNetwork.c q_learning.c)
+target_sources(2048_DRL PRIVATE GameState.c Queue.c q_learning.c)
 
 # Include directories for header files
 target_include_directories(2048_DRL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
