@@ -6,7 +6,7 @@
 #include <time.h>
 
 /*  Merges adjacent tiles with the same value to the left.  */
-void merge_tiles_left(int row[4]) {
+void merge_tiles(int row[4]) {
     // initialize a queue to store all values in one row
     Queue queue;
     initializeQueue(&queue);
@@ -134,7 +134,7 @@ int apply_move(GameState *state, Action action) {
     switch (action) {
         case MOVE_LEFT:
             for (int i = 0; i < 4; i++) {
-                merge_tiles_left(state->board[i]);
+                merge_tiles(state->board[i]);
             }
 
             break;
@@ -143,7 +143,7 @@ int apply_move(GameState *state, Action action) {
             reflect(state->board);
 
             for (int i = 0; i < 4; i++) {
-                merge_tiles_left(state->board[i]);
+                merge_tiles(state->board[i]);
             }
             
             // undo transformations
@@ -155,7 +155,7 @@ int apply_move(GameState *state, Action action) {
             transpose(state->board);
 
             for (int i = 0; i < 4; i++) {
-                merge_tiles_left(state->board[i]);
+                merge_tiles(state->board[i]);
             }
 
             // undo transformations
@@ -168,7 +168,7 @@ int apply_move(GameState *state, Action action) {
             reflect(state->board);
 
             for (int i = 0; i < 4; i++) {
-                merge_tiles_left(state->board[i]);
+                merge_tiles(state->board[i]);
             }
 
             // undo transformations
