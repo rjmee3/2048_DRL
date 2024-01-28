@@ -91,17 +91,9 @@ void spawnTile(GameState *state) {
         return;
     }
 
-    int rand_space;
-
-    if (empty_space > 1) {
-        rand_space = rand() % (empty_space - 1);
-    } else {
-        rand_space = 0;
-    }
+    int rand_space = empty_space > 1 ? rand() % (empty_space - 1) : 0;
 
     int index = 0;
-
-    printf("\n\nrand num: %d\n\n", rand_space);
 
     int rnum = (rand() % 10) == 0 ? 4 : 2;
 
