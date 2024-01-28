@@ -103,10 +103,12 @@ void spawnTile(GameState *state) {
 
     printf("\n\nrand num: %d\n\n", rand_space);
 
+    int rnum = (rand() % 10) == 0 ? 4 : 2;
+
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (state->board[i][j] == 0 && rand_space == index++) {
-                state->board[i][j] = 2;
+                state->board[i][j] = rnum;
                 return;
             }
         }
