@@ -17,7 +17,7 @@ typedef enum {
     MOVE_DOWN
 } Action;
 
-/*  initializes game state with 2 random tiles  */
+/*  initializes game state with 2 random tiles. */
 void initializeGameState(GameState *state);
 /*  Applies the action to the game state.*/
 int apply_move(GameState *state, Action action);
@@ -25,7 +25,7 @@ int apply_move(GameState *state, Action action);
     to make another move. Returns 0 if another move is available,
     returns 1 if there are no moves left, indicating a game over.   */
 int is_game_over(GameState *state);
-/*  Formats board into string. Primarily for debug      */
+/*  Formats board into string. Primarily for debug.     */
 void boardToString(GameState *state, char *string);
 
 #endif
