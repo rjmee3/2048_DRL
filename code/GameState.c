@@ -1,5 +1,5 @@
-#include "GameState.h"
-#include "Queue.h"
+#include "include/GameState.h"
+#include "include/Queue.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
