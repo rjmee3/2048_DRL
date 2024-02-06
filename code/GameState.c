@@ -91,7 +91,7 @@ void spawnTile(GameState *state) {
         return;
     }
 
-    int rand_space = empty_space > 1 ? rand() % (empty_space - 1) : 0;
+    int rand_space = empty_space > 1 ? rand() % (empty_space) : 0;
 
     int index = 0;
 
@@ -185,7 +185,35 @@ int apply_move(GameState *state, Action action) {
 }
 
 int is_game_over(GameState *state) {
-    
+    // check for any tiles which contain 0
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->board[i][j] == 0) {
+                return 0;
+            }
+        }
+    }
+
+    // check for available merges
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (state->board[i][j] == state->board[i+1][j] || state->board[i][j] == state->board[i][j+1]) {
+                return 0;
+            }
+        }
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (state->board[3][i] == state->board[3][i+1]) {
+            return 0;
+        }
+
+        if (state->board[i][3] == state->board[i+1][3]) {
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 void boardToString(GameState *state, char *string) {

@@ -13,6 +13,12 @@ int main() {
     printf("Initial Board:\n\n%s", output);
 
     while (1) {
+        if (is_game_over(&state)) {
+            printf("GAME OVER\n");
+
+            break;
+        }
+
         printf("\n\nEnter Move: ");
         scanf(" %c", &move);
 
