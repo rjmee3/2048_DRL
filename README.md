@@ -1,2 +1,5 @@
 # 2048 Deep Reinforcment Learning
 This is the repository for my spring 2024 capstone project. For this project, my goal is to utilize deep reinforcement learning to play the game 2048, study its performance, and compare methods of optimization.
+
+### From C to Python
+Initially, I set out to write this whole project in C, as I thought it would help me understand the inner workings of neural networks and the reinforcement learning process. However, I moved away from this approach, as it became quickly apparent that writing a robust neural network and reinforcement learning library from scratch would prove to be too difficult to complete within the time constraints. Upon this realization, I decided to change languages to something which already had the proper libraries for neural networks. I decided on using Python, as it would come with solid libraries such as NumPy, TensorFlow, Keras, and so much more. I left my work in C in the repository in case I ever wanted to come back to it. All that work is under the folder named [[DEPRECATED]]Code.
