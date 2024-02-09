@@ -28,8 +28,6 @@ typedef struct {
     Layer* layers;
 } NeuralNetwork;
 
-hyperparams->input_size;
-
 /*  handles the allocation of memory for the network. Returns a neural network
     on success, otherwise returns NULL to indicate failure.     */
 NeuralNetwork* create_network(int num_layers, int* layer_sizes, ActivationType* activations);
