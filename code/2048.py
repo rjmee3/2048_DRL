@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 from enum import Enum
 from collections import deque
+# from getkey import getkey, keys
 import copy
 import random
 import os
@@ -29,6 +32,7 @@ def initialize_board():
     place_rand_tile(board)
     return board
 
+# function to place a random tile on the board
 def place_rand_tile(board):
     # creating a list of each tile coord with a zero
     empty_cells = [(i, j) for i in range(BOARD_SIZE) for j in range(BOARD_SIZE) if board[i][j] == 0]
@@ -38,7 +42,8 @@ def place_rand_tile(board):
     if empty_cells:
         i, j = random.choice(empty_cells)
         board[i][j] = 2 if random.random() < 0.9 else 4
-        
+      
+# function to handle moves in all directions
 def move(board, action):
     orig_board = copy.deepcopy(board)
     if action == "a":
@@ -68,12 +73,15 @@ def move(board, action):
         place_rand_tile(board)
     return board
 
+# function to transpose board matrix.
 def transpose(matrix):
     return [list(row) for row in zip(*matrix)]
 
+# function to reverse board matrix.
 def reverse(matrix):
     return [row[::-1] for row in matrix]
 
+# funcytion to merge board matrix.
 def merge(board):
     queue = deque()
     
@@ -97,6 +105,7 @@ def merge(board):
 
     return board
 
+# function to check if the game is over
 def is_game_over(board):
     for row in board:
         if 0 in row or any(row[i] == row[i+1] for i in range(BOARD_SIZE-1)):
