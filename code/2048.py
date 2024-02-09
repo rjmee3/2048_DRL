@@ -46,19 +46,23 @@ def place_rand_tile(board):
 # function to handle moves in all directions
 def move(board, action):
     orig_board = copy.deepcopy(board)
+    # LEFT
     if action == "a":
         board = merge(board)
         pass
+    # RIGHT
     elif action == "d":
         board = reverse(board)
         board = merge(board)
         board = reverse(board)
         pass
+    # UP
     elif action == "w":
         board = transpose(board)
         board = merge(board)
         board = transpose(board)
         pass
+    # DOWN
     elif action == "s":
         board = transpose(board)
         board = reverse(board)
