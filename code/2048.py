@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-
 from enum import Enum
 from collections import deque
-# from getkey import getkey, keys
 import copy
 import random
 import os
