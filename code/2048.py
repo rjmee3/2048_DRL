@@ -6,14 +6,7 @@ import random
 import os
 
 # program constants
-BOARD_SIZE = 4
-
-# define possible actions
-class Action(Enum):
-    MOVE_LEFT = 1
-    MOVE_RIGHT = 2
-    MOVE_UP = 3
-    MOVE_DOWN = 4
+BOARD_SIZE = 4  # default board size is 4
 
 # function to print the board to the console
 def print_board(board):
@@ -71,6 +64,8 @@ def move(board, action):
     else:
         print("ERR: Invalid Action. ")
         return board
+    
+    # do not place a new rand tile if board doesnt change.
     if board != orig_board:
         place_rand_tile(board)
     return board
@@ -83,7 +78,7 @@ def transpose(matrix):
 def reverse(matrix):
     return [row[::-1] for row in matrix]
 
-# funcytion to merge board matrix.
+# function to merge board matrix.
 def merge(board):
     queue = deque()
     
