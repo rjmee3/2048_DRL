@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from enum import Enum
 from collections import deque
 import copy
 import random
