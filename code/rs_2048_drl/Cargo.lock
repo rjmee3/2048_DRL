@@ -2248,6 +2248,7 @@ name = "rs_2048_drl"
 version = "0.1.0"
 dependencies = [
  "burn",
+ "rand",
 ]
 
 [[package]]
