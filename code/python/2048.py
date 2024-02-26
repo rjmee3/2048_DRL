@@ -96,6 +96,8 @@ def move(board, action):
 
 def calculate_reward(orig_board, board):
     reward = 0
+    orig_board = flatten_board(orig_board)
+    board = flatten_board(board)
     if board == orig_board:
         reward += NEG_REWARD_RATE
 
@@ -160,6 +162,19 @@ def build_model(input_size, output_size):
     model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy')
     return model
 
+def one_hot_encode(board):
+    possible_values = [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
+    
+    encoded_board = np.zeros((4, 4, 16), dtype=int)
+    
+    for i in range(BOARD_SIZE):
+        for j in range(BOARD_SIZE):
+            tile_value = board[i][j]
+            if tile_value in possible_values:
+                encoded_board[i, j, possible_values.index(tile_value)] = 1
+                
+    return encoded_board
+
 if __name__ == "__main__":
     
     # board = initialize_board()
@@ -172,7 +187,7 @@ if __name__ == "__main__":
     # print("Game Over!")
     
     # building the policy network
-    policy_model = build_model(BOARD_SIZE**2, 4)
+    policy_model = build_model((BOARD_SIZE * BOARD_SIZE) ** 2, 4)
     
     # hyperparameters
     num_episodes = 1000
@@ -192,7 +207,7 @@ if __name__ == "__main__":
         epsilon *= 0.995  # Annealing epsilon over time
 
         while not is_game_over(board):
-            state = np.array([board])  # Convert the current board to a flattened vector
+            state = np.array([one_hot_encode(reshape_board(board)).reshape(-1)])  # Convert the current board to a flattened vector
 
             # Choose an action based on the policy probabilities
             action_probabilities = policy_model.predict(state, verbose=0)[0]
@@ -204,7 +219,7 @@ if __name__ == "__main__":
             new_board, reward = result[0], result[1]
 
             # Store the state, action, and reward
-            state_sequence.append(new_board)
+            state_sequence.append(one_hot_encode(reshape_board(new_board)).reshape(-1))
             action_sequence.append(action)
             reward_sequence.append(reward)
 
@@ -226,7 +241,7 @@ if __name__ == "__main__":
         returns_array = np.vstack(discounted_returns)
 
         # Train the policy model using policy gradient update
-        policy_model.train_on_batch(np.vstack(state_sequence), np.eye(4)[action_sequence], sample_weight=np.vstack(returns_array))
+        policy_model.train_on_batch(states_array, actions_one_hot, sample_weight=returns_array)
 
         # Print episode information
         print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
