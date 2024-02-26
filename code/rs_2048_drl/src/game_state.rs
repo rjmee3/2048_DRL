@@ -5,10 +5,12 @@ use std::process::Command;
 
 const BOARD_SIZE: usize = 4;
 
-pub const MOVE_LEFT: u8 = 0;
-pub const MOVE_RIGHT: u8 = 1;
-pub const MOVE_UP: u8 = 2;
-pub const MOVE_DOWN: u8 = 3;
+pub enum Action {
+    MoveLeft,
+    MoveRight,
+    MoveUp,
+    MoveDown,
+}
 
 // initializes the board and places 2 random tiles
 pub fn initialize_board()  -> [[u32; BOARD_SIZE]; BOARD_SIZE] {
@@ -59,7 +61,7 @@ fn transpose(board: &mut [[u32; BOARD_SIZE]; BOARD_SIZE]) {
 
 // reflects board
 fn reflect(board: &mut [[u32; BOARD_SIZE]; BOARD_SIZE]) {
-    let mut temp: [[u32; 4]; 4] = [[0; 4]; 4];
+    let mut temp: [[u32; BOARD_SIZE]; BOARD_SIZE] = [[0; BOARD_SIZE]; BOARD_SIZE];
 
     for i in 0..BOARD_SIZE {
         for j in 0..BOARD_SIZE {
@@ -109,31 +111,31 @@ fn merge_row(row: &mut [u32; BOARD_SIZE]) {
 }
 
 // handles moves in all 4 directions
-pub fn move_board(board: &mut [[u32; BOARD_SIZE]; BOARD_SIZE], action: u8) {
+pub fn move_board(board: &mut [[u32; BOARD_SIZE]; BOARD_SIZE], action: Action) {
     let original_board: [[u32; BOARD_SIZE]; BOARD_SIZE] = board.clone();
 
     // match the action passed and move board as needed
     match action {
-        MOVE_LEFT => {  // LEFT
+        Action::MoveLeft => {  // LEFT
             for i in 0..BOARD_SIZE {
                 merge_row(&mut board[i]);
             }
         }
-        MOVE_RIGHT => {  // RIGHT
+        Action::MoveRight => {  // RIGHT
             reflect(board);
             for i in 0..BOARD_SIZE {
                 merge_row(&mut board[i]);
             }
             reflect(board);
         }
-        MOVE_UP => {  // UP
+        Action::MoveUp => {  // UP
             transpose(board);
             for i in 0..BOARD_SIZE {
                 merge_row(&mut board[i]);
             }
             transpose(board);
         }
-        MOVE_DOWN => {  // DOWN
+        Action::MoveDown => {  // DOWN
             transpose(board);
             reflect(board);
             for i in 0..BOARD_SIZE {
@@ -141,9 +143,6 @@ pub fn move_board(board: &mut [[u32; BOARD_SIZE]; BOARD_SIZE], action: u8) {
             }
             reflect(board);
             transpose(board);
-        }
-        _ => {
-            println!("ERR: Invalid Action.");
         }
     }
 

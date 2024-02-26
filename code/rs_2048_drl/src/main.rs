@@ -1,7 +1,7 @@
 use std::io;
-use crate::game::*;
+use crate::game_state::*;
 
-mod game;
+mod game_state;
 
 fn main() {
     let mut board = initialize_board();
@@ -13,11 +13,12 @@ fn main() {
         action = action.trim().to_string();
 
         match action.as_str() {
-            "w" => move_board(&mut board, MOVE_UP),
-            "a" => move_board(&mut board, MOVE_LEFT),
-            "s" => move_board(&mut board, MOVE_DOWN),
-            "d" => move_board(&mut board, MOVE_RIGHT),
-            _ => println!("ERR: Invalid Action.")
+            "w" => move_board(&mut board, Action::MoveUp),
+            "a" => move_board(&mut board, Action::MoveLeft),
+            "s" => move_board(&mut board, Action::MoveDown),
+            "d" => move_board(&mut board, Action::MoveRight),
+            "quit" => break,
+            _ => println!("ERR: Invalid Action."),
         }
     }
 }
