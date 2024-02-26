@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from tensorflow import keras 
 from keras.layers import Dense
 from keras.models import Sequential
@@ -10,6 +10,7 @@ import copy
 import random
 import os
 import pandas as pd
+import sys
 
 # program constants
 BOARD_SIZE = 4
@@ -27,7 +28,8 @@ def print_board(board):
     # os.system('clear' if os.name == 'posix' else 'cls')
     for i in range(0, len(board), BOARD_SIZE):
         format_row = ' '.join(f'{value:5}' for value in board[i:i+BOARD_SIZE])
-        print(format_row, flush=True)
+        print(format_row)
+        sys.stdout.flush()
         
 # function to initialize the board 
 def initialize_board():
@@ -96,10 +98,12 @@ def move(board, action):
 
 def calculate_reward(orig_board, board):
     reward = 0
+    board = flatten_board(board)
+    orig_board = flatten_board(orig_board)
     if board == orig_board:
         reward += NEG_REWARD_RATE
 
-    reward += (max(board) - max(orig_board)) * POS_REWARD_RATE * 2
+    # reward += (max(board) - max(orig_board)) * POS_REWARD_RATE * 2
     
     reward += (board.count(0) - orig_board.count(0)) * POS_REWARD_RATE
     return reward
