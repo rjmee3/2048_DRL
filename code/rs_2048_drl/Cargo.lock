@@ -267,6 +267,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b11d8fd1e8c656eee1a0bb503b798c4583904dcaf7a369cbb8fdfd3acc3d0ab"
 dependencies = [
  "bincode",
+ "burn-autodiff",
  "burn-candle",
  "burn-common",
  "burn-dataset",
