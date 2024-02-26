@@ -218,6 +218,5 @@ fn main() {
             "d" => move_board(&mut board, MOVE_RIGHT),
             _ => println!("ERR: Invalid Action.")
         }
-        
     }
 }
