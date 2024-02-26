@@ -19,3 +19,9 @@ build/
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+
+# ignoring rust artifacts
+debug/
+target/
+**/*.rs.bk
+*.pdb
