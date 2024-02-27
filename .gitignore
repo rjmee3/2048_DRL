@@ -1,4 +1,4 @@
-# ignoring build folder stuff
+# ignoring CMake artifacts
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -12,7 +12,7 @@ CTestTestfile.cmake
 _deps
 build/
 
-# ignoring vscode stuff
+# ignoring vscode artifacts
 .vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -20,9 +20,11 @@ build/
 !.vscode/extensions.json
 *.code-workspace
 
-# ignoring rust
+# ignoring rust artifacts
 debug/
 target/
 **/*.rs.bk
 *.pdb
-rs_2048_drl/
+
+# ignoring python artifacts
+__pycache__/
