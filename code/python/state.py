@@ -37,7 +37,7 @@ def merge(board):
 
     return board
 
-class Game: 
+class State: 
     # function to initialize the board 
     def __init__(self, board_size):
         self.board = np.zeros((board_size, board_size), dtype=int)

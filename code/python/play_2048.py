@@ -1,7 +1,7 @@
-from game import Game
+from state import State
 
 if __name__ == "__main__":
-    game = Game(4)
+    game = State(4)
     while not game.game_over:
         game.print_board()
         direction = input("Enter Move: ")
