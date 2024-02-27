@@ -20,8 +20,9 @@ build/
 !.vscode/extensions.json
 *.code-workspace
 
-# ignoring rust artifacts
+# ignoring rust
 debug/
 target/
 **/*.rs.bk
 *.pdb
+rs_2048_drl/
