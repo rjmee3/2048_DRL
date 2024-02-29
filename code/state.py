@@ -44,36 +44,38 @@ class State:
         place_rand_tile(self.board)
         place_rand_tile(self.board)
         self.game_over = False
+        self.move_count = 0
+        self.invalid_count = 0
         self.up_count = 0
         self.down_count = 0
         self.left_count = 0
         self.right_count = 0
     
     # function to print the board to the console
-    def print_board(self):
+    def print_state(self):
         for row in self.board:
             format_row = ' '.join(f'{value:5}' for value in row)
             print(format_row)  
             
-    def move(self, direction):
+    def move_state(self, direction):
         orig_board = np.copy(self.board)
-        if direction == "a":    # LEFT
+        if direction == 0:    # LEFT
             merge(self.board)
             self.left_count += 1
             pass
-        elif direction == "d":  # RIGHT
+        elif direction == 1:  # RIGHT
             self.board = np.flip(self.board, axis=1)
             merge(self.board)
             self.board = np.flip(self.board, axis=1)
             self.right_count += 1
             pass
-        elif direction == "w":  # UP
+        elif direction == 2:  # UP
             self.board = np.transpose(self.board)
             merge(self.board)
             self.board = np.transpose(self.board)
             self.up_count += 1
             pass
-        elif direction == "s":  # DOWN
+        elif direction == 3:  # DOWN
             self.board = np.transpose(self.board)
             self.board = np.flip(self.board, axis=1)
             merge(self.board)
@@ -86,9 +88,13 @@ class State:
             
         if not np.array_equal(self.board, orig_board):
             place_rand_tile(self.board)
+        else:
+            self.invalid_count += 1
+            
+        self.move_count += 1
 
     # function updates game over attribute
-    def update(self):
+    def update_state(self):
         if np.any(self.board == 0):
             self.game_over = False
             return
