@@ -1,23 +1,23 @@
 from state import State
 
 if __name__ == "__main__":
-    game = State(4)
-    while not game.game_over:
-        game.print_state()
+    state = State(4)
+    while not state.game_over:
+        state.print()
         direction = input("Enter Move: ")
         
         if direction == "w":
-            game.move_state(2)
+            state.move(2)
         elif direction == "a":
-            game.move_state(0)
+            state.move(0)
         elif direction == "s":
-            game.move_state(3)
+            state.move(3)
         elif direction == "d":
-            game.move_state(1)
+            state.move(1)
         else:
             print("Invalid Input!")
         
-        game.update_state()
+        state.update()
         
-    game.print_state()
+    state.print()
     print("Game Over!")
