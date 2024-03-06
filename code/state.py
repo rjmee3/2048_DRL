@@ -3,8 +3,6 @@ import numpy as np
 import random
 import torch
 
-BOARD_SIZE = 4
-
 # function to place a random tile on the board
 def place_rand_tile(board):
     # creating a list of each tile coord with a zero
@@ -17,10 +15,9 @@ def place_rand_tile(board):
         board[i, j] = 2 if random.random() < 0.9 else 4
 
 # function to merge board matrix.
-def merge(board, score, prev_score):
+def merge(board, score):
     queue = deque()
-    prev_score = prev_score
-    
+        
     # queuing all non-zero elements in a row
     for row in board:
         for i in range(len(row)):
@@ -35,7 +32,6 @@ def merge(board, score, prev_score):
             
             if queue and row[index] == queue[0]:
                 row[index] += queue.popleft()
-                prev_score = score
                 score += row[index]
             
             index += 1
@@ -44,6 +40,8 @@ def merge(board, score, prev_score):
         while index < len(row):
             row[index] = 0
             index += 1
+            
+    return score
 
 class State: 
     
@@ -70,10 +68,11 @@ class State:
                             to make.
     '''
     
-    def __init__(self):
-        self.board = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=int)
+    def __init__(self, board_size):
+        self.board = np.zeros((board_size, board_size), dtype=int)
         place_rand_tile(self.board)
         place_rand_tile(self.board)
+        self.board_size = board_size
         self.game_over = False
         self.move_count = 0
         self.invalid_count = 0
@@ -85,7 +84,7 @@ class State:
         self.prev_score = 0
     
     def reset(self):
-        self.board = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=int)
+        self.board = np.zeros((self.board_size, self.board_size), dtype=int)
         place_rand_tile(self.board)
         place_rand_tile(self.board)
         self.game_over = False
@@ -100,26 +99,27 @@ class State:
             
     def move(self, direction):
         orig_board = np.copy(self.board)
+        self.prev_score = self.score
         if direction == 0:    # LEFT
-            merge(self.board, self.score, self.prev_score)
+            self.score = merge(self.board, self.score)
             self.left_count += 1
             pass
         elif direction == 1:  # RIGHT
             self.board = np.flip(self.board, axis=1)
-            merge(self.board, self.score, self.prev_score)
+            self.score = merge(self.board, self.score)
             self.board = np.flip(self.board, axis=1)
             self.right_count += 1
             pass
         elif direction == 2:  # UP
             self.board = np.transpose(self.board)
-            merge(self.board, self.score, self.prev_score)
+            self.score = merge(self.board, self.score)
             self.board = np.transpose(self.board)
             self.up_count += 1
             pass
         elif direction == 3:  # DOWN
             self.board = np.transpose(self.board)
             self.board = np.flip(self.board, axis=1)
-            merge(self.board, self.score, self.prev_score)
+            self.score = merge(self.board, self.score)
             self.board = np.flip(self.board, axis=1)
             self.board = np.transpose(self.board)
             self.down_count += 1
@@ -158,7 +158,7 @@ class State:
     def print(self):
         for row in self.board:
             format_row = ' '.join(f'{value:5}' for value in row)
-            print(format_row)  
+            print(format_row, flush=True)  
         
     '''
                     MACHINE LEARNING FUNCTIONS        
@@ -178,16 +178,16 @@ class State:
                             being the value of the merged tile.)
     '''
     
-    def one_hot_encode(self, batch_size=1):
-        log_values = torch.log2(self.board[self.board != 0], dtype=torch.float32)
+    def one_hot_encode(self, batch_size):
+        log_values = np.log2(self.board[self.board != 0]).astype(np.float32)
         
-        one_hot_encoded = torch.zeros((batch_size, BOARD_SIZE, BOARD_SIZE, (BOARD_SIZE**2)+1), dtype=torch.int)
+        one_hot_encoded = np.zeros((batch_size, self.board_size, self.board_size, (self.board_size**2)+1), dtype=np.int32)
         
         for i in range(len(log_values)):
-            row, col = torch.where(torch.tensor(self.board) == 2**log_values[i])
+            row, col = np.where(self.board == 2**log_values[i])
             one_hot_encoded[:, row, col, int(log_values[i])] = 1
             
-        return one_hot_encoded
+        return torch.from_numpy(one_hot_encoded).to(torch.float)
     
     def calculate_reward(self):
         return self.score - self.prev_score
