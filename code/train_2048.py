@@ -17,11 +17,13 @@ GAMMA              = 0.99
 REPLAY_BUFFER_SIZE = 10000
 TARGET_UPDATE_FREQ = 10
 MAX_EPISODES       = 1000
+EPSILON_INITIAL    = 0.1
+EPSILON_DECAY      = 0.99
 
 '''-----------------------------------------------------------------------'''
 
 # creating data frame to store episode info
-episode_data = {'Episode': [], 'Total Reward': [], 'Up Count': [], 'Down Count': [], 
+episode_data = {'Episode': [], 'Total Reward': [], 'Move Count': [], 'Up Count': [], 'Down Count': [], 
                 'Left Count': [], 'Right Count': [], 'Invalid Count': [], 'Max Tile': []}
 
 # instantiating networks
@@ -47,17 +49,25 @@ for episode in range(MAX_EPISODES):
     # reward per episode
     total_reward = 0
     
+    # reseting epsilon
+    epsilon = EPSILON_INITIAL
+    
     while not state.game_over:
         # convert state to one-hot encoded tensor
         state_tensor = state.one_hot_encode(BATCH_SIZE)
         
         # choosing action using epsilon-greedy strat
-        epsilon = 0.1
+        epsilon *= EPSILON_DECAY
+        valid_actions = state.get_valid_actions()
+        invalid_actions = np.array(state.get_invalid_actions())
         if np.random.rand() < epsilon:
-            action = np.random.randint(ACTION_SIZE)
+            action = np.random.choice(valid_actions)
         else:
             with torch.no_grad():
                 q_values = model(state_tensor)
+                
+                if len(invalid_actions) > 0:
+                    q_values[0, invalid_actions] = float('-inf')
                 action = torch.argmax(q_values).item()
                 
         # applying selected action
@@ -116,11 +126,12 @@ for episode in range(MAX_EPISODES):
         
     # print the board and its total reward at the end of each episode
     state.print()
-    print("Final Reward = ", total_reward, flush=True)
+    print("Episode", episode, "- Final Reward = ", total_reward, flush=True)
     
     # store episode data
     episode_data['Episode'].append(episode)
     episode_data['Total Reward'].append(total_reward)
+    episode_data['Move Count'].append(state.move_count)
     episode_data['Up Count'].append(state.up_count)
     episode_data['Down Count'].append(state.down_count)
     episode_data['Left Count'].append(state.left_count)

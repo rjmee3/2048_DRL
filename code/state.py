@@ -2,6 +2,7 @@ from collections import deque
 import numpy as np
 import random
 import torch
+from copy import copy
 
 # function to place a random tile on the board
 def place_rand_tile(board):
@@ -97,24 +98,27 @@ class State:
         self.score = 0
         self.prev_score = 0
             
-    def move(self, direction):
+    def move(self, direction, count=True):
         orig_board = np.copy(self.board)
         self.prev_score = self.score
         if direction == 0:    # LEFT
             self.score = merge(self.board, self.score)
-            self.left_count += 1
+            if count:
+                self.left_count += 1
             pass
         elif direction == 1:  # RIGHT
             self.board = np.flip(self.board, axis=1)
             self.score = merge(self.board, self.score)
             self.board = np.flip(self.board, axis=1)
-            self.right_count += 1
+            if count:
+                self.right_count += 1
             pass
         elif direction == 2:  # UP
             self.board = np.transpose(self.board)
             self.score = merge(self.board, self.score)
             self.board = np.transpose(self.board)
-            self.up_count += 1
+            if count:
+                self.up_count += 1
             pass
         elif direction == 3:  # DOWN
             self.board = np.transpose(self.board)
@@ -122,7 +126,8 @@ class State:
             self.score = merge(self.board, self.score)
             self.board = np.flip(self.board, axis=1)
             self.board = np.transpose(self.board)
-            self.down_count += 1
+            if count:
+                self.down_count += 1
             pass
         else:
             print("ERR: Invalid Action.")
@@ -132,7 +137,8 @@ class State:
         else:
             self.invalid_count += 1
             
-        self.move_count += 1
+        if count:
+                self.move_count += 1
 
     # function updates game over attribute
     def update(self):
@@ -191,3 +197,43 @@ class State:
     
     def calculate_reward(self):
         return self.score - self.prev_score
+    
+    def get_valid_actions(self):
+        valid_actions = []
+        
+        orig_board = np.copy(self.board)
+        orig_score = self.score
+        orig_prev_score = self.prev_score
+        orig_invalid_count = self.invalid_count
+        
+        for action in range(4):
+            self.move(action, count=False)
+            if self.invalid_count == orig_invalid_count:
+                valid_actions.append(action)
+            
+            self.board = np.copy(orig_board)
+            self.score = orig_score
+            self.prev_score = orig_prev_score
+            self.invalid_count = orig_invalid_count
+        
+        return valid_actions
+    
+    def get_invalid_actions(self):
+        invalid_actions = []
+        
+        orig_board = np.copy(self.board)
+        orig_score = self.score
+        orig_prev_score = self.prev_score
+        orig_invalid_count = self.invalid_count
+        
+        for action in range(4):
+            self.move(action, count=False)
+            if self.invalid_count != orig_invalid_count:
+                invalid_actions.append(action)
+            
+            self.board = np.copy(orig_board)
+            self.score = orig_score
+            self.prev_score = orig_prev_score
+            self.invalid_count = orig_invalid_count
+        
+        return invalid_actions
