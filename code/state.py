@@ -1,6 +1,7 @@
 from collections import deque
 import numpy as np
 import random
+import torch
 
 BOARD_SIZE = 4
 
@@ -45,7 +46,30 @@ def merge(board, score, prev_score):
             index += 1
 
 class State: 
-    # function to initialize the board 
+    
+    '''
+                    BOARD MANIPULATION FUNCTIONS        
+            --------------------------------------------
+        Functions related to manipulating the data on the board.
+        
+        __init__         :  creates a BOARD_SIZE x BOARD_SIZE array to 
+                            represent the board, and then places 2 random
+                            tiles on the board. Also initializes several
+                            parameters to zero, and initializes game_over
+                            to false.
+                    
+        reset            :  Basically does exactly what __init__ does, just
+                            resets an already initialized object.
+                    
+        move             :  Applies the move provided by the direction
+                            parameter, also increments the corresponding
+                            move counter and score.
+                    
+        update           :  Checks the board for game over and updates the
+                            game_over attribute if there are no moves left
+                            to make.
+    '''
+    
     def __init__(self):
         self.board = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=int)
         place_rand_tile(self.board)
@@ -73,12 +97,6 @@ class State:
         self.right_count = 0
         self.score = 0
         self.prev_score = 0
-        
-    # function to print the board to the console
-    def print(self):
-        for row in self.board:
-            format_row = ' '.join(f'{value:5}' for value in row)
-            print(format_row)  
             
     def move(self, direction):
         orig_board = np.copy(self.board)
@@ -128,14 +146,48 @@ class State:
             
         self.game_over = True
         
-    # function to return board as one-hot encoded 3d array
-    def one_hot_encode(self, batch_size=1):
-        log_values = np.log2(self.board[self.board != 0])
+    
+    '''
+                     DATA ACCESSING FUNCTIONS        
+            --------------------------------------------
+        Functions related to getting data from the state object.
         
-        one_hot_encoded = np.zeros((batch_size, BOARD_SIZE, BOARD_SIZE, (BOARD_SIZE**2)+1), dtype=int)
+        print            :  prints the current state of the board.
+    '''
+    
+    def print(self):
+        for row in self.board:
+            format_row = ' '.join(f'{value:5}' for value in row)
+            print(format_row)  
+        
+    '''
+                    MACHINE LEARNING FUNCTIONS        
+            --------------------------------------------
+        Functions related to using the state in a machine learning
+        environment.
+        
+        one_hot_encode   :  Returns a one-hot encoded tensor of size 
+                            1 x BOARD_SIZE x BOARD_SIZE x (BOARD_SIZE**2)+1 
+                            (+1 because that accounts for the highest 
+                            attainable tile from randomly getting a 4)
+        
+        calculate_reward :  Returns the reward from making a move, which 
+                            is simply calculated as the current score - 
+                            previous score. (Points are earned towards 
+                            score by merging tiles, with the score earned
+                            being the value of the merged tile.)
+    '''
+    
+    def one_hot_encode(self, batch_size=1):
+        log_values = torch.log2(self.board[self.board != 0], dtype=torch.float32)
+        
+        one_hot_encoded = torch.zeros((batch_size, BOARD_SIZE, BOARD_SIZE, (BOARD_SIZE**2)+1), dtype=torch.int)
         
         for i in range(len(log_values)):
-            row, col = np.where(self.board == 2**log_values[i])
+            row, col = torch.where(torch.tensor(self.board) == 2**log_values[i])
             one_hot_encoded[:, row, col, int(log_values[i])] = 1
             
         return one_hot_encoded
+    
+    def calculate_reward(self):
+        return self.score - self.prev_score
