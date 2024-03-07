@@ -5,22 +5,25 @@ from model import QNetwork
 from state import State
 import numpy as np
 import pandas as pd
+import os
 
 '''----------------------------HYPERPARAMETERS----------------------------'''
 
 BOARD_SIZE         = 4                                              # length of one size of the board
-BATCH_SIZE         = 4                                              # num of examples used in one iteration
+BATCH_SIZE         = 1                                              # num of examples used in one iteration
 STATE_SIZE         = BATCH_SIZE * (BOARD_SIZE**4 + BOARD_SIZE**2)   # size of a one-hot encoded board
 ACTION_SIZE        = 4                                              # will always be 4 (up, down, left, right)
 LEARNING_RATE      = 0.001
 GAMMA              = 0.99
 REPLAY_BUFFER_SIZE = 10000
 TARGET_UPDATE_FREQ = 10
-MAX_EPISODES       = 1000
+MAX_EPISODES       = 10000
 EPSILON_INITIAL    = 0.1
 EPSILON_DECAY      = 0.99
+MODEL_WEIGHTS_PATH = 'model_weights.pth'
 
 '''-----------------------------------------------------------------------'''
+
 
 # creating data frame to store episode info
 episode_data = {'Episode': [], 'Total Reward': [], 'Move Count': [], 'Up Count': [], 'Down Count': [], 
@@ -29,6 +32,10 @@ episode_data = {'Episode': [], 'Total Reward': [], 'Move Count': [], 'Up Count':
 # instantiating networks
 model = QNetwork(STATE_SIZE, ACTION_SIZE)
 target_model = QNetwork(STATE_SIZE, ACTION_SIZE)
+
+# loading model weights if possible
+if os.path.exists(MODEL_WEIGHTS_PATH):
+    model.load_state_dict(torch.load(MODEL_WEIGHTS_PATH))
 target_model.load_state_dict(model.state_dict())
 
 # defining loss function and optimizer
@@ -57,7 +64,6 @@ for episode in range(MAX_EPISODES):
         state_tensor = state.one_hot_encode(BATCH_SIZE)
         
         # choosing action using epsilon-greedy strat
-        epsilon *= EPSILON_DECAY
         valid_actions = state.get_valid_actions()
         invalid_actions = np.array(state.get_invalid_actions())
         if np.random.rand() < epsilon:
@@ -81,6 +87,9 @@ for episode in range(MAX_EPISODES):
         
         # update game_over
         state.update()
+        
+        # decay epsilon
+        epsilon *= EPSILON_DECAY
         
         # get next state as one-hot encoded tensor
         next_state_tensor = state.one_hot_encode(BATCH_SIZE)
@@ -141,3 +150,5 @@ for episode in range(MAX_EPISODES):
     
 df = pd.DataFrame(episode_data)
 df.to_excel('episode_data.xlsx', index=False)
+
+torch.save(model.state_dict(), MODEL_WEIGHTS_PATH)
