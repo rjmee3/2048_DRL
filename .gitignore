@@ -30,4 +30,4 @@ target/
 __pycache__/
 
 # ignoring deprecated code
-[DEPRECATED]code/
+\[DEPRECATED\]code/
