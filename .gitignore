@@ -28,3 +28,6 @@ target/
 
 # ignoring python artifacts
 __pycache__/
+
+# ignoring deprecated code
+[DEPRECATED]code/
