@@ -4,6 +4,8 @@ import torch.nn.functional as F
 class QNetwork(nn.Module):
     def __init__(self, state_size, action_size):
         super(QNetwork, self).__init__()
+        self.state_size = state_size
+        self.action_size = action_size
         self.fc1 = nn.Linear(state_size, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 128)
@@ -14,8 +16,7 @@ class QNetwork(nn.Module):
         self.fc8 = nn.Linear(8, action_size)
 
     def forward(self, x):
-        # print(x.size())
-        x = x.view(-1, self.fc1.in_features)
+        x = x.reshape(-1, self.state_size)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))

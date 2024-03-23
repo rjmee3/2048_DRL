@@ -83,6 +83,8 @@ class State:
         self.right_count = 0
         self.score = 0
         self.prev_score = 0
+        self.max = 0
+        self.prev_max = 0
     
     def reset(self):
         self.board = np.zeros((self.board_size, self.board_size), dtype=int)
@@ -97,10 +99,13 @@ class State:
         self.right_count = 0
         self.score = 0
         self.prev_score = 0
+        self.max = 0
+        self.prev_max = 0
             
     def move(self, direction, count=True):
         orig_board = np.copy(self.board)
         self.prev_score = self.score
+        self.prev_max = self.max
         if direction == 0:    # LEFT
             self.score = merge(self.board, self.score)
             if count:
@@ -134,6 +139,7 @@ class State:
             
         if not np.array_equal(self.board, orig_board):
             place_rand_tile(self.board)
+            self.max = np.max(self.board)
         else:
             self.invalid_count += 1
             
@@ -184,19 +190,19 @@ class State:
                             being the value of the merged tile.)
     '''
     
-    def one_hot_encode(self, batch_size):
+    def one_hot_encode(self):
         log_values = np.log2(self.board[self.board != 0]).astype(np.float32)
         
-        one_hot_encoded = np.zeros((batch_size, self.board_size, self.board_size, (self.board_size**2)+1), dtype=np.int32)
+        one_hot_encoded = np.zeros((self.board_size, self.board_size, (self.board_size**2)+1), dtype=np.int32)
         
         for i in range(len(log_values)):
             row, col = np.where(self.board == 2**log_values[i])
-            one_hot_encoded[:, row, col, int(log_values[i])] = 1
+            one_hot_encoded[row, col, int(log_values[i])] = 1
             
-        return torch.from_numpy(one_hot_encoded).to(torch.float)
+        return torch.flatten(torch.from_numpy(one_hot_encoded).to(torch.float), start_dim=0, end_dim=1)
     
     def calculate_reward(self):
-        return self.score - self.prev_score
+        return (self.score - self.prev_score) + self.calculate_merges_value() + (2 * (self.max - self.prev_max))
     
     def get_valid_actions(self):
         valid_actions = []
@@ -237,3 +243,22 @@ class State:
             self.invalid_count = orig_invalid_count
         
         return invalid_actions
+    
+    def calculate_merges_value(self):
+        merge_values = 0
+        
+        # for horizontal merges
+        for row in range(self.board_size):
+            squeezed_row = np.trim_zeros(self.board[row, :], 'b')
+            for col in range(len(squeezed_row) - 1):
+                if squeezed_row[col] == squeezed_row[col + 1] and squeezed_row[col] != 0:
+                    merge_values += 2 * squeezed_row[col]
+                    
+        # for vertical merges
+        for col in range(self.board_size):
+            squeezed_col = np.trim_zeros(self.board[:, col], 'b')
+            for row in range(len(squeezed_col) - 1):
+                if squeezed_col[row] == squeezed_col[row + 1] and squeezed_col[row] != 0:
+                    merge_values += 2 * squeezed_col[row]
+                    
+        return merge_values
