@@ -21,6 +21,7 @@ class ReplayBufferDataset(Dataset):
     def __getitem__(self, idx):
         return self.replay_buffer[idx]
     
+# function for softmax exploration
 def softmax(x):
     """Compute softmax values for each row of input x."""
     e_x = np.exp(x - np.max(x))  # Subtract max(x) for numerical stability
@@ -32,15 +33,15 @@ BOARD_SIZE         = 4                                              # length of 
 BATCH_SIZE         = 64                                             # num of examples used in one iteration
 STATE_SIZE         = (BOARD_SIZE**4 + BOARD_SIZE**2)                # size of a one-hot encoded board
 ACTION_SIZE        = 4                                              # will always be 4 (up, down, left, right)
-LEARNING_RATE      = 0.001
-GAMMA              = 0.9
-REPLAY_BUFFER_SIZE = 100000
-TARGET_UPDATE_FREQ = 1
-MAX_EPISODES       = 10000
-EPSILON_INITIAL    = 1.0
-EPSILON_DECAY      = 0.99
-EPSILON_FINAL      = 0.01
-MODEL_WEIGHTS_PATH = 'model_weights.pth'
+LEARNING_RATE      = 0.001                                          # learning rate for minimizing loss function
+GAMMA              = 0.9                                            # discount factor to determine importance of future reward
+REPLAY_BUFFER_SIZE = 100000                                         # how many experiences are stored in the replay buffer
+TARGET_UPDATE_FREQ = 1                                              # how many episodes it takes until the target network is updated
+MAX_EPISODES       = 10000                                          # maximum number of episodes to train on
+EPSILON_INITIAL    = 1.0                                            # initial value for epsilon in epsilon-greedy strategy
+EPSILON_DECAY      = 0.99                                           # the rate at which epsilon decays
+EPSILON_FINAL      = 0.01                                           # the lowest epsilon is allowed to go
+MODEL_WEIGHTS_PATH = 'model_weights.pth'                            # file path for saved model weights
 
 '''-----------------------------------------------------------------------'''
 
@@ -49,13 +50,11 @@ MODEL_WEIGHTS_PATH = 'model_weights.pth'
 episode_data = {'Episode': [], 'Total Reward': [], 'Move Count': [], 'Up Count': [], 'Down Count': [], 
                 'Left Count': [], 'Right Count': [], 'Invalid Count': [], 'Max Tile': []}
 
-# instantiating networks and moving to GPU
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("cuda" if torch.cuda.is_available() else "cpu")
-model = nn.DataParallel(QNetwork(STATE_SIZE, ACTION_SIZE).to(device))
-target_model = nn.DataParallel(QNetwork(STATE_SIZE, ACTION_SIZE).to(device))
+# instantiating networks
+model = QNetwork(STATE_SIZE, ACTION_SIZE)
+target_model = QNetwork(STATE_SIZE, ACTION_SIZE)
 
-# loading model weights if possible
+# loading model weights if possible/available
 if os.path.exists(MODEL_WEIGHTS_PATH):
     model.load_state_dict(torch.load(MODEL_WEIGHTS_PATH))
 target_model.load_state_dict(model.state_dict())
@@ -100,58 +99,35 @@ reward_list = []
 loss_list = []
 avg_list = []
 
-# initializing variables for gradient accumulation
-accumulation_steps = 5  # Accumulate gradients over 5 batches before updating the model
-
-# initialize an empty gradient dictionary to store accumulated gradients
-accumulated_gradients = {name: torch.zeros_like(param) for name, param in model.named_parameters()}
-
 #training loop
 for episode in range(MAX_EPISODES):
-    # reset the board each episode
+    # reset everything
     state.reset()
-    
-    # reward per episode
     total_reward = 0
-    
-    # reseting epsilon
     epsilon = EPSILON_INITIAL
-    
-    # resetting step count
     step_count = 0
     
+    # allow network to play full game
     while not state.game_over:
+        # incrementing step count
         step_count += 1
         
         # convert state to one-hot encoded tensor
-        state_tensor = state.one_hot_encode().to(device)
+        state_tensor = state.one_hot_encode()
         
-        # # choosing action using epsilon-greedy strat
-        # valid_actions = state.get_valid_actions()
-        invalid_actions = np.array(state.get_invalid_actions())
-                
         # choosing action using softmax exploration
+        invalid_actions = np.array(state.get_invalid_actions())
         with torch.no_grad():
             q_values = model(state_tensor)
             if len(invalid_actions) > 0:
                 q_values[0, invalid_actions] = float('-inf')
-        
-        # convert q_values to numpy array
         q_values_numpy = q_values.cpu().numpy().flatten()
-        
-        # apply softmax to q_values
         action_probabilities = softmax(q_values_numpy)
-        
-        # sample action based on probabilities
         action = np.random.choice(np.arange(len(action_probabilities)), p=action_probabilities)
-
-        # applying selected action
         state.move(action)
         
-        # calculate reward
+        # calculate reward and increment total reward
         reward = state.calculate_reward()
-        
-        #increment total reward
         total_reward += reward
         
         # update game_over
@@ -167,34 +143,30 @@ for episode in range(MAX_EPISODES):
         # store experience in replay buffer
         replay_buffer.append((state_tensor, action, reward, next_state_tensor, state.game_over))
         
-        # Ensure replay buffer does not exceed maximum size
+        # ensure replay buffer does not exceed maximum size
         if len(replay_buffer) > REPLAY_BUFFER_SIZE:
             replay_buffer = replay_buffer[-REPLAY_BUFFER_SIZE:]
         
-        # sampling a mini-batch from replay buffer
+        # sampling a mini-batch from replay buffer (FULL BATCH)
         if len(replay_buffer) >= BATCH_SIZE:
             dataset = ReplayBufferDataset(replay_buffer, REPLAY_BUFFER_SIZE)
             dataLoader = DataLoader(dataset, batch_size=len(replay_buffer), shuffle=True)
             
+            # for each element in data loader train network?
             for batch in dataLoader:
                 # extracting components
                 states, actions, rewards, next_states, dones = batch
             
-                # converting to pytorch tensors and moving to GPU
-                states = states.to(device)
-                actions = torch.tensor(actions, dtype=torch.long).to(device)
-                rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
-                next_states = next_states.to(device)
-                dones = torch.tensor(dones, dtype=torch.float32).to(device)
+                # converting to pytorch tensors
+                actions = torch.tensor(actions, dtype=torch.long)
+                rewards = torch.tensor(rewards, dtype=torch.float32)
+                dones = torch.tensor(dones, dtype=torch.float32)
                 
                 # calculating target q vals
                 with torch.no_grad():
                     target_q_values = target_model(next_states)
                     target_q_values, _ = torch.max(target_q_values, dim=1)
                     target_q_values = rewards + GAMMA * (1 - dones) * target_q_values
-                    
-                # concatenate the tensors in the tuple along dimension 0
-                # states_concatenated = torch.stack(states, dim=0)
 
                 # passing the concatenated tensor to the model
                 predicted_q_values = model(states).gather(1, actions.view(-1, 1))
@@ -205,17 +177,16 @@ for episode in range(MAX_EPISODES):
                 loss.backward()
                 optimizer.step()
             
+            # graphing loss each step (might be slowing shit down a lot idk)
             step_list.append(step_count)
             loss_list.append(loss.item())
-        
             loss_plot.set_data(step_list, loss_list)
-            
             ax[1].relim()
             ax[1].autoscale_view()
-            
             fig.canvas.draw()
             fig.canvas.flush_events()
-                
+       
+    # reset loss and step list each episode            
     loss_list = []
     step_list = []
             
@@ -242,23 +213,21 @@ for episode in range(MAX_EPISODES):
     episode_list.append(episode)
     reward_list.append(total_reward)
     avg_list.append(sum(reward_list) / len(reward_list))
-    
-    # if episode % 50 == 0:
     reward_plot.set_data(episode_list, reward_list)
     avg_plot.set_data(episode_list, avg_list)
-    
     ax[0].relim()
     ax[0].autoscale_view()
     ax[2].relim()
     ax[2].autoscale_view()
-    
     fig.canvas.draw()
     fig.canvas.flush_events()
             
 plt.ioff()
 plt.show()
     
+# saving data to excel
 df = pd.DataFrame(episode_data)
 df.to_excel('episode_data.xlsx', index=False)
 
+# save model weights
 torch.save(model.state_dict(), MODEL_WEIGHTS_PATH)
