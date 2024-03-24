@@ -153,6 +153,7 @@ for episode in range(MAX_EPISODES):
             dataLoader = DataLoader(dataset, batch_size=len(replay_buffer), shuffle=True)
             
             # for each element in data loader train network?
+            # really not sure how this bit works :/
             for batch in dataLoader:
                 # extracting components
                 states, actions, rewards, next_states, dones = batch
