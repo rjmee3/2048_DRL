@@ -30,12 +30,12 @@ def softmax(x):
 '''----------------------------HYPERPARAMETERS----------------------------'''
 
 BOARD_SIZE         = 4                                              # length of one size of the board
-BATCH_SIZE         = 64                                             # num of examples used in one iteration
+BATCH_SIZE         = 100                                            # num of examples used in one iteration
 STATE_SIZE         = (BOARD_SIZE**4 + BOARD_SIZE**2)                # size of a one-hot encoded board
 ACTION_SIZE        = 4                                              # will always be 4 (up, down, left, right)
 LEARNING_RATE      = 0.001                                          # learning rate for minimizing loss function
 GAMMA              = 0.9                                            # discount factor to determine importance of future reward
-REPLAY_BUFFER_SIZE = 100000                                         # how many experiences are stored in the replay buffer
+REPLAY_BUFFER_SIZE = 10000                                          # how many experiences are stored in the replay buffer
 TARGET_UPDATE_FREQ = 1                                              # how many episodes it takes until the target network is updated
 MAX_EPISODES       = 10000                                          # maximum number of episodes to train on
 EPSILON_INITIAL    = 1.0                                            # initial value for epsilon in epsilon-greedy strategy
@@ -150,7 +150,7 @@ for episode in range(MAX_EPISODES):
         # sampling a mini-batch from replay buffer (FULL BATCH)
         if len(replay_buffer) >= BATCH_SIZE:
             dataset = ReplayBufferDataset(replay_buffer, REPLAY_BUFFER_SIZE)
-            dataLoader = DataLoader(dataset, batch_size=len(replay_buffer), shuffle=True)
+            dataLoader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
             
             # for each element in data loader train network?
             # really not sure how this bit works :/
