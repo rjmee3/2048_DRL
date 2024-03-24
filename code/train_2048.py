@@ -39,7 +39,7 @@ REPLAY_BUFFER_SIZE = 10000                                          # how many e
 TARGET_UPDATE_FREQ = 1                                              # how many episodes it takes until the target network is updated
 MAX_EPISODES       = 10000                                          # maximum number of episodes to train on
 EPSILON_INITIAL    = 1.0                                            # initial value for epsilon in epsilon-greedy strategy
-EPSILON_DECAY      = 0.99                                           # the rate at which epsilon decays
+EPSILON_DECAY      = 0.85                                           # the rate at which epsilon decays
 EPSILON_FINAL      = 0.01                                           # the lowest epsilon is allowed to go
 MODEL_WEIGHTS_PATH = 'model_weights.pth'                            # file path for saved model weights
 
@@ -116,14 +116,27 @@ for episode in range(MAX_EPISODES):
         state_tensor = state.one_hot_encode()
         
         # choosing action using softmax exploration
+        # invalid_actions = np.array(state.get_invalid_actions())
+        # with torch.no_grad():
+        #     q_values = model(state_tensor)
+        #     if len(invalid_actions) > 0:
+        #         q_values[0, invalid_actions] = float('-inf')
+        # q_values_numpy = q_values.cpu().numpy().flatten()
+        # action_probabilities = softmax(q_values_numpy)
+        # action = np.random.choice(np.arange(len(action_probabilities)), p=action_probabilities)
+        # state.move(action)
+        
+        # epsilon greedy approach
+        valid_actions = np.array(state.get_valid_actions())
         invalid_actions = np.array(state.get_invalid_actions())
-        with torch.no_grad():
-            q_values = model(state_tensor)
-            if len(invalid_actions) > 0:
-                q_values[0, invalid_actions] = float('-inf')
-        q_values_numpy = q_values.cpu().numpy().flatten()
-        action_probabilities = softmax(q_values_numpy)
-        action = np.random.choice(np.arange(len(action_probabilities)), p=action_probabilities)
+        if np.random.rand() < epsilon:
+            action = np.random.choice(valid_actions)
+        else:
+            with torch.no_grad():
+                q_values = model(state_tensor)
+                if len(invalid_actions) > 0:
+                    q_values[0, invalid_actions] = float('-inf')
+                action = torch.argmax(q_values).item()
         state.move(action)
         
         # calculate reward and increment total reward

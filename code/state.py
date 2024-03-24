@@ -4,6 +4,11 @@ import random
 import torch
 from copy import copy
 
+'''----------------------------HYPERPARAMETERS----------------------------'''
+EMPTY_WEIGHT  = 100
+MONO_WEIGHT   = 10
+SMOOTH_WEIGHT = 1
+
 # function to place a random tile on the board
 def place_rand_tile(board):
     # creating a list of each tile coord with a zero
@@ -85,6 +90,8 @@ class State:
         self.prev_score = 0
         self.max = 0
         self.prev_max = 0
+        self.value = self.calculate_board_value()
+        self.prev_value = self.value
     
     def reset(self):
         self.board = np.zeros((self.board_size, self.board_size), dtype=int)
@@ -101,11 +108,14 @@ class State:
         self.prev_score = 0
         self.max = 0
         self.prev_max = 0
+        self.value = self.calculate_board_value()
+        self.prev_value = self.value
             
     def move(self, direction, count=True):
         orig_board = np.copy(self.board)
         self.prev_score = self.score
         self.prev_max = self.max
+        self.prev_value = self.value
         if direction == 0:    # LEFT
             self.score = merge(self.board, self.score)
             if count:
@@ -140,6 +150,7 @@ class State:
         if not np.array_equal(self.board, orig_board):
             place_rand_tile(self.board)
             self.max = np.max(self.board)
+            self.value = self.calculate_board_value()
         else:
             self.invalid_count += 1
             
@@ -202,7 +213,8 @@ class State:
         return torch.flatten(torch.from_numpy(one_hot_encoded).to(torch.float), start_dim=0, end_dim=1)
     
     def calculate_reward(self):
-        return (self.score - self.prev_score) + self.calculate_merges_value() + (2 * (self.max - self.prev_max))
+        # return (self.score - self.prev_score) + self.calculate_merges_value() + (2 * (self.max - self.prev_max))
+        return self.value - self.prev_value
     
     def get_valid_actions(self):
         valid_actions = []
@@ -262,3 +274,25 @@ class State:
                     merge_values += 2 * squeezed_col[row]
                     
         return merge_values
+    
+    def calculate_board_value(self):
+        # get number of empty cells
+        board_1d = self.board.flatten()
+        empty_cells = np.count_nonzero(board_1d == 0)
+        
+        # calculate monotonicity
+        row_monotonicity = np.sum(np.diff(np.sign(np.diff(self.board, axis=1)), axis=1) >= 0)
+        col_monotonicity = np.sum(np.diff(np.sign(np.diff(self.board, axis=0)), axis=0) >= 0)
+        monotonicity = max(row_monotonicity, col_monotonicity)
+        
+        # calculate smoothness
+        smoothness = 0
+        for row in self.board:
+            smoothness -= np.sum(np.abs(np.diff(row)))
+        for col in self.board.T:
+            smoothness -= np.sum(np.abs(np.diff(col)))
+            
+        # compute inherent value based on these metrics
+        value = empty_cells * EMPTY_WEIGHT + monotonicity * MONO_WEIGHT + smoothness * SMOOTH_WEIGHT
+        
+        return value
