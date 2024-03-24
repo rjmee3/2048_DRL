@@ -8,7 +8,7 @@ class QNetwork(nn.Module):
         self.action_size = action_size
         self.fc1 = nn.Linear(state_size, 128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(8, action_size)
+        self.fc3 = nn.Linear(64, action_size)
         
         # self.fc1 = nn.Linear(state_size, 512)
         # self.fc2 = nn.Linear(512, 256)
