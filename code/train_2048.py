@@ -86,10 +86,10 @@ ax[1].set_xlabel('Training Step')
 ax[1].set_ylabel('Loss')
 ax[1].legend()
 
-avg_plot, = ax[2].plot([], [], label='Moving Average', color='red', linestyle='dotted')
+scatter_plot, = ax[2].plot([], [], label='Total Reward vs Total Moves', color='red', marker='o', linestyle='')
 ax[2].set_title('Moving Average of Total Reward')
-ax[2].set_xlabel('Episode')
-ax[2].set_ylabel('Average')
+ax[2].set_xlabel('# of Moves')
+ax[2].set_ylabel('Total Reward')
 ax[2].legend()
 
 # initialize empty lists for dynamic plotting
@@ -97,7 +97,7 @@ episode_list = []
 step_list = []
 reward_list = []
 loss_list = []
-avg_list = []
+move_list = []
 
 #training loop
 for episode in range(MAX_EPISODES):
@@ -116,28 +116,28 @@ for episode in range(MAX_EPISODES):
         state_tensor = state.one_hot_encode()
         
         # choosing action using softmax exploration
-        # invalid_actions = np.array(state.get_invalid_actions())
-        # with torch.no_grad():
-        #     q_values = model(state_tensor)
-        #     if len(invalid_actions) > 0:
-        #         q_values[0, invalid_actions] = float('-inf')
-        # q_values_numpy = q_values.cpu().numpy().flatten()
-        # action_probabilities = softmax(q_values_numpy)
-        # action = np.random.choice(np.arange(len(action_probabilities)), p=action_probabilities)
-        # state.move(action)
+        invalid_actions = np.array(state.get_invalid_actions())
+        with torch.no_grad():
+            q_values = model(state_tensor)
+            if len(invalid_actions) > 0:
+                q_values[0, invalid_actions] = float('-inf')
+        q_values_numpy = q_values.cpu().numpy().flatten()
+        action_probabilities = softmax(q_values_numpy)
+        action = np.random.choice(np.arange(len(action_probabilities)), p=action_probabilities)
+        state.move(action)
         
         # epsilon greedy approach
-        valid_actions = np.array(state.get_valid_actions())
-        invalid_actions = np.array(state.get_invalid_actions())
-        if np.random.rand() < epsilon:
-            action = np.random.choice(valid_actions)
-        else:
-            with torch.no_grad():
-                q_values = model(state_tensor)
-                if len(invalid_actions) > 0:
-                    q_values[0, invalid_actions] = float('-inf')
-                action = torch.argmax(q_values).item()
-        state.move(action)
+        # valid_actions = np.array(state.get_valid_actions())
+        # invalid_actions = np.array(state.get_invalid_actions())
+        # if np.random.rand() < epsilon:
+        #     action = np.random.choice(valid_actions)
+        # else:
+        #     with torch.no_grad():
+        #         q_values = model(state_tensor)
+        #         if len(invalid_actions) > 0:
+        #             q_values[0, invalid_actions] = float('-inf')
+        #         action = torch.argmax(q_values).item()
+        # state.move(action)
         
         # calculate reward and increment total reward
         reward = state.calculate_reward()
@@ -163,7 +163,7 @@ for episode in range(MAX_EPISODES):
         # sampling a mini-batch from replay buffer (FULL BATCH)
         if len(replay_buffer) >= BATCH_SIZE:
             dataset = ReplayBufferDataset(replay_buffer, REPLAY_BUFFER_SIZE)
-            dataLoader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+            dataLoader = DataLoader(dataset, batch_size=len(replay_buffer), shuffle=True)
             
             # for each element in data loader train network?
             # really not sure how this bit works :/
@@ -226,9 +226,10 @@ for episode in range(MAX_EPISODES):
     # update plot dynamically
     episode_list.append(episode)
     reward_list.append(total_reward)
-    avg_list.append(sum(reward_list) / len(reward_list))
+    move_list.append(state.move_count)
     reward_plot.set_data(episode_list, reward_list)
-    avg_plot.set_data(episode_list, avg_list)
+    scatter_plot.set_data(move_list, reward_list)
+    
     ax[0].relim()
     ax[0].autoscale_view()
     ax[2].relim()

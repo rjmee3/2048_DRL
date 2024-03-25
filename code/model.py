@@ -21,8 +21,8 @@ class QNetwork(nn.Module):
 
     def forward(self, x):
         x = x.reshape(-1, self.state_size)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = F.leaky_relu(self.fc1(x))
+        x = F.leaky_relu(self.fc2(x))
         x = self.fc3(x)
         # x = F.relu(self.fc3(x))
         # x = F.relu(self.fc4(x))

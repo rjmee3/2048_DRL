@@ -114,7 +114,7 @@ class State:
     def move(self, direction, count=True):
         orig_board = np.copy(self.board)
         self.prev_score = self.score
-        self.prev_max = self.max
+        self.prev_max = np.max(self.board)
         self.prev_value = self.value
         if direction == 0:    # LEFT
             self.score = merge(self.board, self.score)
@@ -213,8 +213,14 @@ class State:
         return torch.flatten(torch.from_numpy(one_hot_encoded).to(torch.float), start_dim=0, end_dim=1)
     
     def calculate_reward(self):
-        # return (self.score - self.prev_score) + self.calculate_merges_value() + (2 * (self.max - self.prev_max))
-        return self.value - self.prev_value
+        return (self.score - self.prev_score) + self.calculate_merges_value()
+    
+            # (2 * (self.max - self.prev_max))
+            # (self.score - self.prev_score)    + )    # increase in score
+                #      # value of merges on the board
+                  # increase in max tile
+                # + (self.value - self.prev_value))   # increase in inherent "board value"
+        
     
     def get_valid_actions(self):
         valid_actions = []
