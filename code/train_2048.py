@@ -191,7 +191,7 @@ for episode in range(MAX_EPISODES):
                 loss.backward()
                 optimizer.step()
             
-            # graphing loss each step (might be slowing shit down a lot idk)
+            # graphing loss each step (might be slowing it down a lot idk)
             step_list.append(step_count)
             loss_list.append(loss.item())
             loss_plot.set_data(step_list, loss_list)
