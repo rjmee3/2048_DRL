@@ -1,7 +1,7 @@
-from state import State
+from state import Env
 
 if __name__ == "__main__":
-    state = State(4)
+    state = Env(4)
     while not state.game_over:
         state.print()
         direction = input("Enter Move: ")

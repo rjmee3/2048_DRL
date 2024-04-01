@@ -1,8 +1,6 @@
 from collections import deque
 import numpy as np
 import random
-import torch
-from copy import copy
 
 '''----------------------------HYPERPARAMETERS----------------------------'''
 EMPTY_WEIGHT  = 100
@@ -21,8 +19,9 @@ def place_rand_tile(board):
         board[i, j] = 2 if random.random() < 0.9 else 4
 
 # function to merge board matrix.
-def merge(board, score):
+def merge(board):
     queue = deque()
+    score_increase = 0
         
     # queuing all non-zero elements in a row
     for row in board:
@@ -38,7 +37,7 @@ def merge(board, score):
             
             if queue and row[index] == queue[0]:
                 row[index] += queue.popleft()
-                score += row[index]
+                score_increase += row[index]
             
             index += 1
             
@@ -47,9 +46,9 @@ def merge(board, score):
             row[index] = 0
             index += 1
             
-    return score
+    return score_increase
 
-class State: 
+class Env: 
     
     '''
                     BOARD MANIPULATION FUNCTIONS        
@@ -76,12 +75,9 @@ class State:
     
     def __init__(self, board_size):
         self.board = np.zeros((board_size, board_size), dtype=int)
-        place_rand_tile(self.board)
-        place_rand_tile(self.board)
         self.board_size = board_size
         self.game_over = False
         self.move_count = 0
-        self.invalid_count = 0
         self.up_count = 0
         self.down_count = 0
         self.left_count = 0
@@ -89,9 +85,6 @@ class State:
         self.score = 0
         self.prev_score = 0
         self.max = 0
-        self.prev_max = 0
-        self.value = self.calculate_board_value()
-        self.prev_value = self.value
     
     def reset(self):
         self.board = np.zeros((self.board_size, self.board_size), dtype=int)
@@ -99,7 +92,6 @@ class State:
         place_rand_tile(self.board)
         self.game_over = False
         self.move_count = 0
-        self.invalid_count = 0
         self.up_count = 0
         self.down_count = 0
         self.left_count = 0
@@ -107,30 +99,28 @@ class State:
         self.score = 0
         self.prev_score = 0
         self.max = 0
-        self.prev_max = 0
-        self.value = self.calculate_board_value()
-        self.prev_value = self.value
+        
+        return self.board
             
     def move(self, direction, count=True):
         orig_board = np.copy(self.board)
         self.prev_score = self.score
-        self.prev_max = np.max(self.board)
-        self.prev_value = self.value
+
         if direction == 0:    # LEFT
-            self.score = merge(self.board, self.score)
+            self.score += merge(self.board)
             if count:
                 self.left_count += 1
             pass
         elif direction == 1:  # RIGHT
             self.board = np.flip(self.board, axis=1)
-            self.score = merge(self.board, self.score)
+            self.score += merge(self.board)
             self.board = np.flip(self.board, axis=1)
             if count:
                 self.right_count += 1
             pass
         elif direction == 2:  # UP
             self.board = np.transpose(self.board)
-            self.score = merge(self.board, self.score)
+            self.score += merge(self.board)
             self.board = np.transpose(self.board)
             if count:
                 self.up_count += 1
@@ -138,7 +128,7 @@ class State:
         elif direction == 3:  # DOWN
             self.board = np.transpose(self.board)
             self.board = np.flip(self.board, axis=1)
-            self.score = merge(self.board, self.score)
+            self.score += merge(self.board)
             self.board = np.flip(self.board, axis=1)
             self.board = np.transpose(self.board)
             if count:
@@ -150,9 +140,7 @@ class State:
         if not np.array_equal(self.board, orig_board):
             place_rand_tile(self.board)
             self.max = np.max(self.board)
-            self.value = self.calculate_board_value()
-        else:
-            self.invalid_count += 1
+            self.update()
             
         if count:
                 self.move_count += 1
@@ -210,16 +198,10 @@ class State:
             row, col = np.where(self.board == 2**log_values[i])
             one_hot_encoded[row, col, int(log_values[i])] = 1
             
-        return torch.flatten(torch.from_numpy(one_hot_encoded).to(torch.float), start_dim=0, end_dim=1)
+        return one_hot_encoded
     
     def calculate_reward(self):
-        return (self.score - self.prev_score) + self.calculate_merges_value()
-    
-            # (2 * (self.max - self.prev_max))
-            # (self.score - self.prev_score)    + )    # increase in score
-                #      # value of merges on the board
-                  # increase in max tile
-                # + (self.value - self.prev_value))   # increase in inherent "board value"
+        return (self.score - self.prev_score)
         
     
     def get_valid_actions(self):
