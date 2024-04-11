@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 from IPython.display import clear_output
 import pickle
 import os
-
-
+import torch
+import math
+import torch.nn.functional as F
 
 base_dir = './data/'
 os.makedirs(base_dir, exist_ok=True)
@@ -69,10 +70,11 @@ def transform_state(state, mode='plain'):
         return state
     
 def dqn(agent, version, env, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_decay=0.995, 
-        step_penalty=0, sample_mode='error', start_learn_iterations = 20,
-        bootstrap_iterations = 0, bootstrap_every=50):
+        sample_mode='error', start_learn_iterations = 20):
     
     eps = eps_start
+    eps_initial = eps_start
+    eps_list = []
     starting_iteration = agent.current_iteration
     best_game_history, worst_game_history = load_game_history(version)
     learn_iterations = start_learn_iterations
@@ -90,6 +92,7 @@ def dqn(agent, version, env, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
         total_rewards = reward
         score = env.score
         agent.total_steps = 0
+        eps_list.append(eps)
         
         while not env.done:
             reward = env.negative_reward
@@ -183,48 +186,64 @@ def dqn(agent, version, env, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
         
         time_end = time.time()
               
-        if agent.current_iteration % 5000 == 0:
-            eps = eps * 2
-        else:
-            eps = max(eps_end, eps_decay*eps)
+        eps = max(eps_end, eps_decay*eps)
             
-        if agent.current_iteration % 100 == 0:
+        if agent.current_iteration % 500 == 0:
             clear_output()
             
-            fig, axes = plt.subplots(3, figsize=(6, 7))
+            # Training metrics
             
-            # Training metrics subplot
-            axes[0].plot(agent.max_vals_list + [None for i in range(10000 - len(agent.scores_list))], 
-                        label='Max cell value seen on board', alpha = 0.3, color='c', marker='.', linestyle='')
-            axes[0].plot(agent.mean_steps + [None for i in range(10000 - len(agent.scores_list))], 
-                        label='Mean steps over last 50 episodes', color='b')            
-            ax2 = axes[0].twinx()
-            ax2.plot(agent.mean_total_rewards + [None for i in range(10000 - len(agent.scores_list))], 
-                    label='Mean total rewards over last 50 episodes', color='r')            
-            axes[0].set_xlabel('Episode #')
-            axes[0].set_ylabel('Max Cell Value / Mean Steps')
-            ax2.set_ylabel('Mean Total Rewards')
-            # handles, labels = [(a + b) for a, b in zip(axes[0].get_legend_handles_labels(), ax2.get_legend_handles_labels())]
-            # axes[0].legend(handles, labels)
+            # combined plot of highest tile and mean steps
+            fig1, max_val_mean_steps_plot = plt.subplots()
+            fig1.set_size_inches(16,6)
+            max_val_mean_steps_plot.plot(agent.max_vals_list + [None for _ in range(10000 - len(agent.scores_list))], 
+                                        label='Max cell value seen on board', 
+                                        alpha=0.5,
+                                        color='tab:orange')
+            max_val_mean_steps_plot.plot(agent.mean_steps + [None for _ in range(10000 - len(agent.scores_list))], 
+                                        label='Mean steps over last 50 episodes', 
+                                        color='b')            
+            fig1.tight_layout()
+            plt.legend()
+            plt.xlabel('Episode #')
+            plt.title('Max Tile Reached Each Episode & Mean Steps Over Last 50 Episodes')
+            plt.show()
             
-            # Loss subplot
-            axes[1].plot(agent.losses)
-            axes[1].set_title('Loss')
-            axes[1].set_yscale('log')
+            # mean reward plot
+            fig2, mean_reward_plot = plt.subplots()
+            fig2.set_size_inches(16, 6)
+            mean_reward_plot.plot(agent.mean_total_rewards + [None for _ in range(10000 - len(agent.scores_list))], 
+                                  label='Mean total rewards over last 50 episodes', 
+                                  color='r')
+            fig2.tight_layout()
+            plt.legend()
+            plt.xlabel('Episode #')
+            plt.title('Mean Reward Over Last 50 Episodes')
+            plt.show()
             
-            # Averaged actions stats subplot
-            a_list = np.array(agent.actions_avg_list).T
-            axes[2].stackplot([i for i in range(1, len(agent.actions_avg_list)+1)], 
-                            a_list[0], a_list[1], a_list[2], a_list[3], 
-                            labels=['Up %0.2f' % (agent.actions_avg_list[-1][0] * 100), 
-                                    'Down %0.2f' % (agent.actions_avg_list[-1][1] * 100), 
-                                    'Left %0.2f' % (agent.actions_avg_list[-1][2] * 100), 
-                                    'Right %0.2f' % (agent.actions_avg_list[-1][3] * 100)] )
-            axes[2].set_title('Averaged actions distribution per game')
-            axes[2].legend()
+            # loss plot
+            fig3, loss_plot = plt.subplots()
+            fig3.set_size_inches(16, 6)
+            loss_plot.plot(agent.losses,
+                           label='Loss',
+                           color='c')
+            fig3.tight_layout()
+            plt.legend()
+            plt.yscale('log')
+            plt.xlabel('Episode #')
+            plt.title('Loss')
+            plt.show()
             
-            # Show the combined figure
-            fig.tight_layout()
+            # epsilon plot
+            fig4, eps_plot = plt.subplots()
+            fig4.set_size_inches(16, 6)
+            eps_plot.plot(eps_list,
+                          label='Epsilon per Episode',
+                          color='k')
+            fig4.tight_layout()
+            plt.legend()
+            plt.title('Epsilon Value Per Episode')
+            plt.xlabel('Episode #')
             plt.show()
 
             env.draw_board(agent.best_score_board, 'Best score board')
@@ -232,9 +251,9 @@ def dqn(agent, version, env, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
             save_state(version, eps, env, agent)
             save_game_history(version, best_game_history, worst_game_history)
             
-        s = '%d/%d | %0.2fs | Score:%d | Average Score:%d | Total Rewards:%d | Averager Total Rewards:%d | Max Tile Reached:%d' %\
+        s = '%d/%d | %0.2fs | Score:%d | Average Score:%d | Total Rewards:%d | Average Total Rewards:%d | Max Tile Reached:%d' %\
               (agent.current_iteration, starting_iteration + n_episodes, time_end - time_start, score, np.mean(agent.last_n_scores), 
                total_rewards, np.mean(agent.last_n_total_rewards), np.max(agent.max_vals_list))
         
-        s = s + ' ' * (120-len(s))
+        s = s + ' ' * (150-len(s))
         print(s, end='\r')

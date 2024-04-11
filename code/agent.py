@@ -12,7 +12,6 @@ BUFFER_SIZE = 100000
 BATCH_SIZE = 1024
 GAMMA = 0.99
 LR = 0.00005
-TAU = 0.001
 
 base_dir = './data/'
 
@@ -23,8 +22,7 @@ class Agent():
                  fc1_units=256, fc2_units=256, fc3_units=256,
                  buffer_size=BUFFER_SIZE, batch_size=BATCH_SIZE,
                  lr=LR, use_expected_rewards=True, predict_steps=2,
-                 gamma=GAMMA, tau=TAU):
-        TAU = tau
+                 gamma=GAMMA):
         GAMMA = gamma
         
         self.state_size = state_size
