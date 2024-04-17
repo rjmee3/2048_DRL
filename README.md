@@ -1,2 +1,2 @@
 # 2048 Deep Reinforcment Learning
-This is the repository for my spring 2024 capstone project. For this project, my goal is to utilize deep reinforcement learning to play the game 2048, study its performance, and compare methods of optimization. I initially started out trying to do this whole project in C, however I quickly realized trying to create my own neural network library in C would be extremely difficult in and of itself. Therefore, I decided to switch over to Python, due to its robust AI/ML/RL libraries.
+This is the repository for my spring 2024 capstone project. For this project, my goal is to utilize deep reinforcement learning to play the game 2048, study its performance, and compare methods of optimization.
