@@ -4,20 +4,10 @@ import time
 import random
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
-import pickle
 import os
-import torch
-import math
-import torch.nn.functional as F
 
 base_dir = './data/'
 os.makedirs(base_dir, exist_ok=True)
-
-def save_model(name, agent):
-    agent.save(name)
-    
-def load_state(name, agent):
-    agent.load(name)
 
 def transform_state(state):
     state = np.reshape(state, -1)
@@ -27,7 +17,7 @@ def transform_state(state):
     new_state = np.reshape(np.eye(18)[state], -1)
     return new_state
     
-def dqn(agent, version, env, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_decay=0.995,
+def dqn(agent, env, version, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_decay=0.995,
         start_learn_iterations = 20):
     
     eps = eps_start
@@ -159,9 +149,9 @@ def dqn(agent, version, env, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
             plt.show()
 
             env.draw_board(agent.best_score_board, 'Best Scoring Board')
-            
-            save_model(version, agent)
-            
+
+            agent.save(version)
+                        
         s = '%d/%d | %0.2fs | Score:%d | Average Score:%d | Total Rewards:%d | Average Total Rewards:%d | Max Tile Reached:%d' %\
               (agent.current_iteration, starting_iteration + n_episodes, time_end - time_start, score, np.mean(agent.last_n_scores), 
                total_rewards, np.mean(agent.last_n_total_rewards), np.max(agent.max_vals_list))
