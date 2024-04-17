@@ -13,7 +13,7 @@ base_dir = '.'
 
 '''-------- 2048 Game Class --------'''
 class Game():
-    def __init__(self, size=4, seed=42, negative_reward=-2, reward_mode='log2', tile_move_penalty=0.1):
+    def __init__(self, size=4, seed=42, negative_reward=-2, tile_move_penalty=0.1):
         '''
         Initializes the game environment. size parameter is used in
         setting the dimensions of the board. seed is used in seeding
@@ -26,7 +26,6 @@ class Game():
         self.action_size = 4
         self.best_game_history = []
         self.negative_reward = negative_reward
-        self.reward_mode = reward_mode
         self.tile_move_penalty = tile_move_penalty
         
         np.random.seed(seed)
@@ -107,12 +106,7 @@ class Game():
                     row[i+1] = 0
                     
                     # calculating reward
-                    if self.reward_mode == 'log2':
-                        self.reward += np.log2(row[i])
-                    elif self.reward_mode == 'equal':
-                        self.reward += 1
-                    else:
-                        self.reward += row[i]
+                    self.reward += np.log2(row[i])
                         
             merged_board[index] = row
             
