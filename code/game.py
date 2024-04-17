@@ -239,46 +239,22 @@ class Game():
         self.game_board[i, j] = np.random.choice([2, 4], p=[0.9, 0.1])
 
     def draw_board(self, board=None, title='Current Game'):
-        '''
-        Draws the board out in a matplot figure. '''
-        cell_colors = {
-            0: '#FFFFFF',
-            2: '#EEE4DA',
-            4: '#ECE0C8',
-            8: '#ECB280',
-            16:'#EC8D53',
-            32:'#F57C5F',
-            64:'#E95937',
-            128:'#F3D96B',
-            256:'#F2D04A',
-            512:'#E5BF2E',
-            1024:'#E2B814',
-            2048:'#EBC502',
-            4096:'#00A2D8',
-            8192:'#9ED682',
-            16384:'#9ED682',
-            32768:'#9ED682',
-            65536:'#9ED682',
-            131072:'#9ED682',
-        }
-        
         if board is None:
-            board = self.game_board.copy()
-            
+            board = self.game_board
         num_cols = self.board_dim
         num_rows = self.board_dim
-        
         fig = plt.figure(figsize=(3, 3))
         plt.suptitle(title)
-        axes = [ fig.add_subplot(num_rows, num_cols, r*num_cols+c) for r in range(0, num_rows) for c in range(1, num_cols+1) ]
-
+        axes = [fig.add_subplot(num_rows, num_cols, r * num_cols + c) for r in range(num_rows) for c in range(1, num_cols + 1)]
         v = np.reshape(board, -1)
+        cell_colors = {
+            0: '#FFFFFF', 2: '#EEE4DA', 4: '#ECE0C8', 8: '#ECB280', 16:'#EC8D53', 32:'#F57C5F', 64:'#E95937',
+            128:'#F3D96B', 256:'#F2D04A', 512:'#E5BF2E', 1024:'#E2B814', 2048:'#EBC502', 4096:'#00A2D8',
+            8192:'#9ED682', 16384:'#9ED682', 32768:'#9ED682', 65536:'#9ED682', 131072:'#9ED682'
+        }
         for i, ax in enumerate(axes):
             ax.text(0.5, 0.5, str(int(v[i])), horizontalalignment='center', verticalalignment='center')
             ax.set_facecolor(cell_colors[int(v[i])])
-            
-        for ax in axes:
             ax.set_xticks([])
             ax.set_yticks([])
-            
         plt.show()

@@ -102,7 +102,7 @@ def dqn(agent, env, version, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
               
         eps = max(eps_end, eps_decay*eps)
             
-        if agent.current_iteration % 10000 == 0:
+        if agent.current_iteration % 1000 == 0:
             clear_output()
             
             # Training metrics
