@@ -115,38 +115,6 @@ class Game():
                 
         return merged_board
     
-    
-    def calculate_merges_value(self, board):
-        '''
-        Used in reward calculation to encourage moves which create
-        merge opportunities by placing like tiles next to each other. 
-        NOT CURRENTLY IN USE. '''
-        merge_values = 0
-        
-        # for horizontal merges
-        for row in range(self.board_dim):
-            squeezed_row = np.trim_zeros(board[row, :], 'b')
-            for col in range(len(squeezed_row) - 1):
-                if squeezed_row[col] == squeezed_row[col + 1] and squeezed_row[col] != 0:
-                    if self.reward_mode == 'log2':
-                        merge_values += np.log2(squeezed_row[col])
-                    else:
-                        merge_values += 2 * squeezed_row[col]
-                    col += 1
-                    
-        # for vertical merges
-        for col in range(self.board_dim):
-            squeezed_col = np.trim_zeros(board[:, col], 'b')
-            for row in range(len(squeezed_col) - 1):
-                if squeezed_col[row] == squeezed_col[row + 1] and squeezed_col[row] != 0:
-                    if self.reward_mode == 'log2':
-                        merge_values += np.log2(squeezed_col[row])
-                    else:
-                        merge_values += 2 * squeezed_col[row]
-                    row += 1
-                    
-        return merge_values
-    
     def current_state(self):
         '''
         Returns flattened current board. '''
