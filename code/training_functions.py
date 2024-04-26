@@ -18,7 +18,7 @@ def transform_state(state):
     return new_state
     
 def dqn(agent, env, version, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_decay=0.995,
-        start_learn_iterations = 20):
+        start_learn_iterations = 20, print_moves=False):
     
     eps = eps_start
     eps_list = []
@@ -74,6 +74,10 @@ def dqn(agent, env, version, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
                 
                 agent.total_steps += 1
                 total_rewards += reward
+
+                if print_moves:
+                    env.draw_board()
+                    
                 
                 if done:
                     break
@@ -102,7 +106,7 @@ def dqn(agent, env, version, n_episodes=100, eps_start=0.05, eps_end=0.001, eps_
               
         eps = max(eps_end, eps_decay*eps)
             
-        if agent.current_iteration % 1000 == 0:
+        if agent.current_iteration % 100 == 0:
             clear_output()
             
             # Training metrics
