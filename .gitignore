@@ -31,6 +31,3 @@ __pycache__/
 
 # ignoring deprecated code
 \[DEPRECATED\]code/
-
-# ignoring training data
-data/

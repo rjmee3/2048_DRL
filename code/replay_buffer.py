@@ -7,6 +7,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class ReplayBuffer:
     def __init__(self, action_size, buffer_size, batch_size, seed):
+        '''
+        Initializes replay buffer based on passed args. '''
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)
         self.episode_memory = []
@@ -18,17 +20,25 @@ class ReplayBuffer:
         self.geomspaces = [np.geomspace(1.0, 0.5, i) for i in range(1, 10)]
             
     def reset_episode_memory(self):
+        '''
+        clears episode memory buffer. '''
         self.episode_memory = []
             
     def add(self, state, action, reward, next_state, done, error):
+        '''
+        Adds an experience to episode memory buffer. '''
         exp = self.experience(state, action, reward, next_state, done, error)
         self.episode_memory.append(exp)
         
     def add_episode_experience(self):
+        ''' 
+        Adds episode memory to main memory buffer and resets episode memory. '''
         self.memory.extend(self.episode_memory)
         self.reset_episode_memory()
         
     def calc_expected_rewards(self, steps_ahead=1):
+        '''
+        Calculates the expected rewards based on memory replay. '''
         rewards = [e.reward for e in self.episode_memory]
         exp_rewards = [
             np.sum(rewards[i:i + steps_ahead] * self.geomspaces[steps_ahead - 1])
@@ -42,6 +52,8 @@ class ReplayBuffer:
         self.episode_memory = temp_memory
         
     def sample(self):
+        '''
+        Samples a mini-batch from memory. '''
         experiences = random.sample(self.memory, k=self.batch_size)
         
         states = torch.from_numpy(np.vstack([e.state for e in experiences])).float().to(device)
@@ -53,4 +65,5 @@ class ReplayBuffer:
         return (states, actions, rewards, next_states, dones)
     
     def __len__(self):
+        ''' Returns length of memory. '''
         return len(self.memory)
